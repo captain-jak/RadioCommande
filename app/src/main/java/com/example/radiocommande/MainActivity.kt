@@ -19,6 +19,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import kotlinx.coroutines.*
+import java.io.InputStream
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -91,10 +92,10 @@ class MainActivity : AppCompatActivity() {
         // Mapping simple voix -> commandes Linux
         val commandeSSH = when {
             texte.contains("stop") || texte.contains("quitter") -> "pkill mpv"
-            texte.contains("culture") || texte.contains("france culture") -> "pkill mpv ; mpv https://stream.radiofrance.fr/franceculture/franceculture_hifi.m3u8"
-            texte.contains("dylan") -> "pkill mpv ; mpv --shuffle '/home/enjoy/Musique//Bob Dylan/'"
-            texte.contains("fip culte") -> "pkill mpv ; mpv https://stream.radiofrance.fr/fipcultes/fipcultes_hifi.m3u8"
-            texte.contains("douce") -> "pkill mpv ; mpv --shuffle /home/enjoy/Musique/sweet/"
+            texte.contains("culture") || texte.contains("france culture") -> "pkill mpv ; nohup mpv https://stream.radiofrance.fr/franceculture/franceculture_hifi.m3u8 > /dev/null 2>&1 &"
+            texte.contains("dylan") -> "pkill mpv ; nohup mpv --shuffle '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &"
+            texte.contains("fip culte") -> "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fipcultes/fipcultes_hifi.m3u8 > /dev/null 2>&1 &"
+            texte.contains("douce") -> "pkill mpv ; nohup mpv --shuffle /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &"
             else -> null
         }
 
@@ -106,40 +107,99 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun executerCommandeSSH(commande: String) {
-        updateConsole("SSH : Connexion en cours...")
+////----------------------------      connexion SSH avec mot de passe -------------------------
+//    private fun executerCommandeSSH(commande: String) {
+//        updateConsole("SSH : Connexion en cours...")
         
-        // Exécution en arrière-plan (Coroutine)
+//        // Exécution en arrière-plan (Coroutine)
+//        CoroutineScope(Dispatchers.IO).launch {
+//            try {
+//                val jsch = JSch()
+//                // --- À MODIFIER AVEC VOS INFOS ---
+//                val session = jsch.getSession("enjoy", "192.168.1.80", 2523)
+//                session.setPassword("Verdun1914!!")
+                
+//                val config = Properties()
+//                config["StrictHostKeyChecking"] = "no"
+//                session.setConfig(config)
+//                session.connect(5000)
+
+//                val channel = session.openChannel("exec") as ChannelExec
+//                channel.setCommand(commande)
+//                val inputStream = channel.inputStream
+//                channel.connect()
+
+//                val output = inputStream.bufferedReader().use { it.readText() }
+                
+//                withContext(Dispatchers.Main) {
+//                   updateConsole("Réponse : \n$output")
+//                   parler("Commande envoyée.")
+//                }
+
+//               channel.disconnect()
+//                session.disconnect()
+//            } catch (e: Exception) {
+//                withContext(Dispatchers.Main) {
+//                    updateConsole("Erreur SSH : ${e.message}")
+//                    parler("Échec de la connexion.")
+//                }
+//            }
+//        }
+//    }
+
+//----------------------------      connexion SSH avec cle -------------------------
+private fun executerCommandeSSH(commande: String) {
+        updateConsole("SSH : Connexion par clé...")
+        
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val jsch = JSch()
-                // --- À MODIFIER AVEC VOS INFOS ---
+
+                // --- MODIFICATION POUR LA CLÉ PRIVÉE ---
+                try {
+                    // Lecture de la clé depuis res/raw/id_ssh
+                    val inputStream: InputStream = resources.openRawResource(R.raw.id_ssh)
+                    val keyBytes = inputStream.readBytes()
+                    
+                    // On ajoute l'identité (Si votre clé a une passphrase, ajoutez-la en 2ème argument)
+                    jsch.addIdentity("identite_android", keyBytes, null, null)
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) { updateConsole("Erreur lecture clé : ${e.message}") }
+                    return@launch
+                }
+
+                // --- CONFIGURATION SESSION ---
+                // Note : On ne met plus de mot de passe ici
                 val session = jsch.getSession("enjoy", "192.168.1.80", 2523)
-                session.setPassword("Verdun1914!!")
                 
                 val config = Properties()
                 config["StrictHostKeyChecking"] = "no"
                 session.setConfig(config)
+                
                 session.connect(5000)
 
                 val channel = session.openChannel("exec") as ChannelExec
                 channel.setCommand(commande)
-                val inputStream = channel.inputStream
+                
+                val sshInput = channel.inputStream
                 channel.connect()
 
-                val output = inputStream.bufferedReader().use { it.readText() }
+                val output = sshInput.bufferedReader().use { it.readText() }
                 
                 withContext(Dispatchers.Main) {
-                   updateConsole("Réponse : \n$output")
-                   parler("Commande envoyée.")
+                    updateConsole("Réponse : \n$output")
+                    parler("Commande exécutée.")
                 }
 
-               channel.disconnect()
+                channel.disconnect()
                 session.disconnect()
+
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     updateConsole("Erreur SSH : ${e.message}")
                     parler("Échec de la connexion.")
+                    // Log détaillé en console pour le debug
+                    e.printStackTrace() 
                 }
             }
         }
