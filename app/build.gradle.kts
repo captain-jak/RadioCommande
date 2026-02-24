@@ -5,10 +5,12 @@ plugins {
 android {
     namespace = "com.example.radiocommande"
     compileSdk {
-        version = release(36) {
+           version = release(36) {
             minorApiLevel = 1
         }
     }
+    
+    
 
     defaultConfig {
         applicationId = "com.example.radiocommande"
@@ -45,4 +47,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.github.mwiede:jsch:0.2.17") // Version moderne et maintenue de JSch
+    implementation("com.google.android.material:material:1.11.0")
 }
