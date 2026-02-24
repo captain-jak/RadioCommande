@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"> <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Linux Voice Control"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"/>
+        <View
+    android:id="@+id/pulseView1"
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:background="@drawable/pulse_circle"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="@id/btnMic"
+    app:layout_constraintEnd_toEndOf="@id/btnMic"
+    app:layout_constraintStart_toStartOf="@id/btnMic"
+    app:layout_constraintTop_toTopOf="@id/btnMic" />
+
+<androidx.core.widget.NestedScrollView
+    android:id="@+id/consoleScroll"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_margin="20dp"
+    android:background="#1E1E1E"
+    android:padding="10dp"
+    app:layout_constraintTop_toBottomOf="@id/tvTitle"
+    app:layout_constraintBottom_toTopOf="@id/btnMic">
+    <TextView
+        android:id="@+id/tvConsole"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Attente de commande...\n> "
+        android:textColor="#00FF00" 
+        android:fontFamily="monospace" />
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnMic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:contentDescription="Microphone"
+        app:backgroundTint="#FF5722"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/ic_btn_speak_now" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
