@@ -1,6 +1,6 @@
 package com.radiocommande
 
-import android.content.Context
+//import android.content.Context
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +38,7 @@ class SettingsActivity : AppCompatActivity() {
         val tvVolumeLabel = findViewById<TextView>(R.id.tvVolumeLabel)
         val btnMute = findViewById<ImageButton>(R.id.btnMute)
 
-        val prefs = getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("SSH_REGLAGES", MODE_PRIVATE)
 
         // Charger les anciennes valeurs
         etIp.setText(prefs.getString("ip", ""))

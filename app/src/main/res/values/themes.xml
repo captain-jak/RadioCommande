@@ -1,9 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.RadioCommande2" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Theme.RadioCommande" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">#121212</item>
+        <!-- <item name="android:windowBackground">#F5F5F5</item>  -->
+        <item name="colorPrimary">#FF5722</item>
+        <item name="android:statusBarColor">#F5F5F5</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
-
-    <style name="Theme.RadioCommande2" parent="Base.Theme.RadioCommande2" />
 </resources>

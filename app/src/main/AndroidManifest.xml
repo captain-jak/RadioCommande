@@ -17,8 +17,8 @@
         android:label="RadioCommande"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar"
-        tools:targetApi="31">
+
+        android:theme="@style/Theme.RadioCommande">
 
         <activity
             android:name=".MainActivity"

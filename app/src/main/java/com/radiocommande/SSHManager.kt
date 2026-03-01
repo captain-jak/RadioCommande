@@ -2,8 +2,6 @@ package com.radiocommande
 
 import android.content.Context
 import com.jcraft.jsch.ChannelExec
-import com.jcraft.jsch.JSch
-import java.util.Properties
 
 //  telechargement de cle
 import com.jcraft.jsch.ChannelSftp

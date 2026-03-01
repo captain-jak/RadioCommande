@@ -48,6 +48,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation("com.github.mwiede:jsch:0.2.17") // Version moderne et maintenue de JSch
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.github.mwiede:jsch:2.27.8") // Version moderne et maintenue de JSch
+    implementation("com.google.android.material:material:1.13.0")
 }
