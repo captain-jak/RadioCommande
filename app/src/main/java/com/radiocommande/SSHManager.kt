@@ -1,4 +1,3 @@
-//package com.example.radiocommande
 package com.radiocommande
 
 import android.content.Context
@@ -11,9 +10,7 @@ import com.jcraft.jsch.ChannelSftp
 import java.io.File
 import java.io.FileOutputStream
 
-
 object SSHManager {
-
     //  Test de connexion SSH
     fun testerConnexion(context: Context, callback: (Boolean) -> Unit) {
         val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)

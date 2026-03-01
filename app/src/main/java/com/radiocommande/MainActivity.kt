@@ -1,4 +1,3 @@
-//package com.example.radiocommande // <--- VÉRIFIEZ BIEN VOTRE NOM DE PACKAGE ICI
 package com.radiocommande
 
 import android.Manifest
@@ -17,14 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.jcraft.jsch.ChannelExec
-import com.jcraft.jsch.JSch
-import kotlinx.coroutines.*
-import java.io.InputStream
 import java.util.*
 import android.content.Context
-//import com.example.radiocommande.R
-import com.radiocommande.R
 
 private val dictionnaireCommandes = mapOf(
     "stop"    to "pkill mpv",
@@ -159,7 +152,6 @@ class MainActivity : AppCompatActivity() {
             tvConsole.append("\n$msg")
         
             // On utilise android.widget.ScrollView ici pour correspondre au XML
-            //val scroll = findViewById<android.widget.ScrollView>(R.id.consoleScroll)
             val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
             scroll?.post { 
                 scroll.fullScroll(View.FOCUS_DOWN) 
