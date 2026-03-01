@@ -1,4 +1,5 @@
-package com.example.radiocommande // <--- VÉRIFIEZ BIEN VOTRE NOM DE PACKAGE ICI
+//package com.example.radiocommande // <--- VÉRIFIEZ BIEN VOTRE NOM DE PACKAGE ICI
+package com.radiocommande
 
 import android.Manifest
 import android.animation.AnimatorSet
@@ -22,6 +23,8 @@ import kotlinx.coroutines.*
 import java.io.InputStream
 import java.util.*
 import android.content.Context
+//import com.example.radiocommande.R
+import com.radiocommande.R
 
 private val dictionnaireCommandes = mapOf(
     "stop"    to "pkill mpv",
@@ -68,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        
         // 1. Vérification des permissions au démarrage
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) 
             != PackageManager.PERMISSION_GRANTED) {
@@ -89,7 +93,8 @@ class MainActivity : AppCompatActivity() {
             lancerEcouteVocale()
         }
     }
-//---------------------------------------------------------------------------------------------------------------------------------
+
+//-------------------------------      Lancer l'ecoute vocale      ---------------------------------------
     private fun lancerEcouteVocale() {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -105,6 +110,8 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Erreur micro : ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+   
+//-------------------------------      Commande a envoyer au serveur      ---------------------------------------
 
     private fun interpreterEtEnvoyer(texte: String) {
         var commandeAExecuter: String? = null
@@ -117,13 +124,15 @@ class MainActivity : AppCompatActivity() {
         }
         if (commandeAExecuter != null) {
             updateConsole("Action : Recherche de '$commandeAExecuter'...")
-            executerCommandeSSH(commandeAExecuter)
+            SSHManager.executerCommandeSSH(this, commandeAExecuter)
         } else {
             // Cas spécial pour la recherche dynamique (ex: "cherche erreur")
             if (texte.contains("cherche")) {
-                val mot = texte.replace("cherche", "").trim()
+                updateConsole("Je cherche '$texte'")
+                val mot = texte.replace("cherche ", "").trim()
+                updateConsole("Je cherche apres trim: '$mot'")
                 if (mot.isNotEmpty()) {
-                    executerCommandeSSH("grep -ri '$mot' /var/log/")
+                    chercherFichierSurServeur("/home/enjoy/Musique/", mot)
                 }
             } else {
                parler("Désolé, cette commande n'est pas dans mon dictionnaire.")
@@ -132,103 +141,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//---------------------------------------------------------------------------------------------------------------------------------
-//----------------------------      connexion SSH avec mot de passe -------------------------
-    private fun executerCommandeSSH(commande: String) {
-        val prefs = getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
-        val ip = prefs.getString("ip", "") ?: ""
-        val user = prefs.getString("user", "") ?: ""
-        val pass = prefs.getString("pass", "") ?: ""
-        if (ip.isEmpty() || user.isEmpty()) {
-            updateConsole("Erreur : Configurez les accès dans les paramètres.")
-            return
-        }
-        // Exécution en arrière-plan (Coroutine)
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val jsch = JSch()
-                // --- À MODIFIER AVEC VOS INFOS ---
-                val session = jsch.getSession(user, ip, 2523)
-                session.setPassword(pass)
-                
-                val config = Properties()
-                config["StrictHostKeyChecking"] = "no"
-                session.setConfig(config)
-                session.connect(5000)
+//-------------------------------      Recherche d'un morceau sur le serveur      ---------------------------------------
 
-                val channel = session.openChannel("exec") as ChannelExec
-                channel.setCommand(commande)
-                val inputStream = channel.inputStream
-                channel.connect()
-
-                val output = inputStream.bufferedReader().use { it.readText() }
-                
-                withContext(Dispatchers.Main) {
-                   updateConsole("Réponse : \n$output")
-                   parler("Commande envoyée.")
-                }
-               channel.disconnect()
-               session.disconnect()
-            } catch (e: Exception) { /* ... */ }
-        }
+    private fun chercherFichierSurServeur(repertoire: String, motCle: String) {
+         // Construction de la commande find
+        val commande = "pkill mpv; find '$repertoire' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
+        updateConsole("la commande:  '$commande'")
+        // Utilisation de votre SSHManager
+        SSHManager.executerCommandeSSH(this, commande)
     }
-////----------------------------      connexion SSH avec cle -------------------------
-//private fun executerCommandeSSH(commande: String) {
-//        updateConsole("SSH : Connexion par clé...")
-        
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                val jsch = JSch()
 
-//                // --- MODIFICATION POUR LA CLÉ PRIVÉE ---
-//                try {
-//                    // Lecture de la clé depuis res/raw/id_ssh
-//                    val inputStream: InputStream = resources.openRawResource(R.raw.id_ssh)
-//                    val keyBytes = inputStream.readBytes()
-                    
-//                    // On ajoute l'identité (Si votre clé a une passphrase, ajoutez-la en 2ème argument)
-//                    jsch.addIdentity("identite_android", keyBytes, null, null)
-//                } catch (e: Exception) {
-//                    withContext(Dispatchers.Main) { updateConsole("Erreur lecture clé : ${e.message}") }
-//                    return@launch
-//                }
+//-------------------------------      Lecture audio de texte      ---------------------------------------
 
-//                // --- CONFIGURATION SESSION ---
-//                // Note : On ne met plus de mot de passe ici
-//                val session = jsch.getSession("enjoy", "192.168.1.80", 2523)
-                
-//                val config = Properties()
-//                config["StrictHostKeyChecking"] = "no"
-//                session.setConfig(config)
-                
-//                session.connect(5000)
-
-//                val channel = session.openChannel("exec") as ChannelExec
-//                channel.setCommand(commande)
-                
-//                val sshInput = channel.inputStream
-//                channel.connect()
-
-//                val output = sshInput.bufferedReader().use { it.readText() }
-                
-//                withContext(Dispatchers.Main) {
-//                    updateConsole("Réponse : \n$output")
-//                    parler("Commande exécutée.")
-//                }
-
-//                channel.disconnect()
-//                session.disconnect()
-
-//            } catch (e: Exception) {
-//                withContext(Dispatchers.Main) {
-//                    updateConsole("Erreur SSH : ${e.message}")
-//                    parler("Échec de la connexion.")
-//                    // Log détaillé en console pour le debug
-//                    e.printStackTrace() 
-//                }
-//            }
-//        }
-//    }
 
     private fun updateConsole(msg: String) {
         runOnUiThread {
@@ -243,11 +167,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+//-------------------------------      Lecture audio de texte      ---------------------------------------
+
     private fun parler(message: String) {
         if (::tts.isInitialized) { // Vérifie si tts a été bien créé
             tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
         }
     }
+
+//-------------------------------      Verifier le statut du serveur     ---------------------------------------
+
+    private fun verifierStatutServeur() {
+        val tvStatus = findViewById<TextView>(R.id.tvStatusConnexion)
+        val dot = findViewById<View>(R.id.viewStatusDot)
+        tvStatus.text = "Vérification..."
+        SSHManager.testerConnexion(this) { success ->
+            if (success) {
+                tvStatus.text = "Serveur : Connecté"
+                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Vert
+                dot.setBackgroundResource(android.R.drawable.presence_online)
+            } else {
+                tvStatus.text = "Serveur : Hors ligne"
+                tvStatus.setTextColor(android.graphics.Color.RED)
+                dot.setBackgroundResource(android.R.drawable.presence_offline)
+            }
+        }
+    }
+//-------------------------------      Anilmation d'un bouton     ---------------------------------------
 
     private fun startPulseAnimation() {
         pulseView.visibility = View.VISIBLE
@@ -262,6 +208,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        verifierStatutServeur()
+    }
+    
     override fun onDestroy() {
         if (::tts.isInitialized) {
             tts.stop()
@@ -269,4 +220,5 @@ class MainActivity : AppCompatActivity() {
         }
         super.onDestroy()
     }
+    
 }

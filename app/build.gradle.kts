@@ -3,7 +3,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.radiocommande"
+    //namespace = "com.example.radiocommande"
+    namespace = "com.radiocommande"
     compileSdk {
            version = release(36) {
             minorApiLevel = 1
@@ -13,11 +14,12 @@ android {
     
 
     defaultConfig {
-        applicationId = "com.example.radiocommande"
+        //applicationId = "com.example.radiocommande"
+        applicationId = "com.radiocommande"
         minSdk = 34
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

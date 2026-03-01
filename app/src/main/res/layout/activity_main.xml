@@ -18,43 +18,72 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/layoutStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="5dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
         <View
-    android:id="@+id/pulseView1"
-    android:layout_width="100dp"
-    android:layout_height="100dp"
-    android:background="@drawable/pulse_circle"
-    android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="@id/btnMic"
-    app:layout_constraintEnd_toEndOf="@id/btnMic"
-    app:layout_constraintStart_toStartOf="@id/btnMic"
-    app:layout_constraintTop_toTopOf="@id/btnMic" />
+            android:id="@+id/viewStatusDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="8dp"
+            android:background="@android:drawable/presence_offline" />
+
+        <TextView
+            android:id="@+id/tvStatusConnexion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Serveur : Déconnecté"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/pulseView1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/pulse_circle"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/btnMic"
+        app:layout_constraintEnd_toEndOf="@id/btnMic"
+        app:layout_constraintStart_toStartOf="@id/btnMic"
+        app:layout_constraintTop_toTopOf="@id/btnMic" />
     
     <ImageButton
-    android:id="@+id/btnSettings"
-    android:layout_width="48dp"
-    android:layout_height="48dp"
-    android:src="@android:drawable/ic_menu_preferences"
-    android:background="?attr/selectableItemBackgroundBorderless"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_margin="16dp" />
+        android:id="@+id/btnSettings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/ic_menu_preferences"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp" />
 
-<androidx.core.widget.NestedScrollView
-    android:id="@+id/consoleScroll"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_margin="20dp"
-    android:background="#1E1E1E"
-    android:padding="10dp"
-    app:layout_constraintTop_toBottomOf="@id/tvTitle"
-    app:layout_constraintBottom_toTopOf="@id/btnMic">
-    <TextView
-        android:id="@+id/tvConsole"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/consoleScroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Attente de commande...\n> "
-        android:textColor="#00FF00" 
-        android:fontFamily="monospace" />
+        android:layout_height="0dp"
+        android:layout_margin="20dp"
+        android:background="#1E1E1E"
+        android:padding="10dp"
+        app:layout_constraintTop_toBottomOf="@id/layoutStatus"
+        app:layout_constraintBottom_toTopOf="@id/btnMic">
+        
+        <TextView
+            android:id="@+id/tvConsole"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Attente de commande...\n> "
+            android:textColor="#00FF00" 
+            android:fontFamily="monospace" />
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -68,5 +97,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@android:drawable/ic_btn_speak_now" />
-
+        
 </androidx.constraintlayout.widget.ConstraintLayout>
