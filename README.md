@@ -1,7 +1,7 @@
 RadioCommande: contrôle vocal de vos playlist et de vos radios preferes
 # RadioCommande
 
-contrôle vocal de vos playlists et de vos radios préférés
+contrôle vocal a partir d'un mobile de vos playlists et de vos radios préférés situées sur un servuer distant
 
 ## 📌 Description
 
