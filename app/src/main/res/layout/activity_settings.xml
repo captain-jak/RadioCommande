@@ -21,7 +21,7 @@
         android:id="@+id/etIp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Adresse IP (ex: 192.168.1.50)"
+        android:hint="Adresse IP (ex: 192.168.1.50:22)"
         android:inputType="text" />
 
     <EditText

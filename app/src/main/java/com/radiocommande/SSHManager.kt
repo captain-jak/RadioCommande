@@ -15,13 +15,18 @@ object SSHManager {
         val ip = prefs.getString("ip", "") ?: ""
         val user = prefs.getString("user", "") ?: ""
         val pass = prefs.getString("pass", "") ?: ""
+        val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
+        val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
+        val port = portString.toIntOrNull() ?: 22
+
         Thread {
             try {
                 val jsch = com.jcraft.jsch.JSch()
                 // On tente d'ajouter la clé si elle existe
                 //val keyFile = File(context.filesDir, "ssh_key")
                 //if (keyFile.exists()) jsch.addIdentity(keyFile.absolutePath)
-                val session = jsch.getSession(user, ip, 2523)
+                //val session = jsch.getSession(user, ip, 2523)
+                val session = jsch.getSession(user, lip, port)
                 // On définit le mot de passe pour la session
                 session.setPassword(pass)
                 val config = java.util.Properties()
@@ -48,15 +53,13 @@ object SSHManager {
     //     connexion SSH avec mot de passe 
     fun executerCommandeSSH(context: Context, commande: String) {
         val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
-        
         val ip = prefs.getString("ip", "") ?: ""
         val user = prefs.getString("user", "") ?: ""
         val pass = prefs.getString("pass", "") ?: ""
-        if (ip.isEmpty() || user.isEmpty()) {
-            android.util.Log.d("SSH_DEBUG", "Pas de connexion ")
-            return
-        }
-
+        val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
+        val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
+        val port = portString.toIntOrNull() ?: 22
+        android.util.Log.d("SSH_COMMAND", "Exécution de : $commande")
         Thread {
             try {
                 val jsch = com.jcraft.jsch.JSch()
@@ -69,7 +72,7 @@ object SSHManager {
 //#=>                    val pass = prefs.getString("pass", "") ?: ""
 //#=>                    //session.setPassword(pass)
 //#=>                }
-                val session = jsch.getSession(user, ip, 2523)
+                val session = jsch.getSession(user, lip, port)
                 // On définit le mot de passe pour la session
                 session.setPassword(pass)
                 val config = java.util.Properties()
@@ -96,8 +99,12 @@ object SSHManager {
 // Dans votre object SSHManager
 fun telechargerFichier(context: Context, cheminServeur: String, nomFichier: String) {
     val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
-    val host = prefs.getString("host", "") ?: ""
+    val ip = prefs.getString("ip", "") ?: ""
     val user = prefs.getString("user", "") ?: ""
+    val pass = prefs.getString("pass", "") ?: ""
+    val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
+    val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
+    val port = portString.toIntOrNull() ?: 22
     // On ne récupère plus le mot de passe, mais le chemin de la clé si besoin
     
     Thread {
@@ -107,9 +114,9 @@ fun telechargerFichier(context: Context, cheminServeur: String, nomFichier: Stri
             // --- CONFIGURATION DE LA CLÉ PRIVÉE ---
             // Supposons que votre clé est dans les fichiers internes de l'app
             val pathKey = File(context.filesDir, "id_rsa").absolutePath
-            jsch.addIdentity(pathKey) 
-            
-            val session = jsch.getSession(user, host, 2523)
+            jsch.addIdentity(pathKey)
+
+            val session = jsch.getSession(user, lip, port)
             val config = java.util.Properties()
             config["StrictHostKeyChecking"] = "no"
             session.setConfig(config)

@@ -132,6 +132,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (commandeAExecuter != null) {
             updateConsole("Action : Recherche de '$commandeAExecuter'...")
+            android.util.Log.d("SSH_COMMAND", "Exécution de mainactivity : $commandeAExecuter")
             SSHManager.executerCommandeSSH(this, commandeAExecuter)
         } else {
             // Cas spécial pour la recherche dynamique (ex: "cherche erreur")
