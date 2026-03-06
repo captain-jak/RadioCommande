@@ -30,3 +30,8 @@ git remote add origin https://github.com/captain-jak/RadioCommande
 git remote set-url origin git@github.com:captain-jak/RadioCommande.git
 # 3 - Push the Code
 git add . && git commit -m "update" && git push -u origin master
+
+## 🛠️ Prerequis
+
+Sur le serveur:
+sudo apt install sshfs mpv socat

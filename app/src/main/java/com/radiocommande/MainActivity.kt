@@ -20,17 +20,31 @@ import java.util.*
 
 //import android.content.Context
 
+// mot cles reserves (a ne pas utiliser dans le dictionnaire
+// CHERCHE -- SUIVANT -- PRECEDENT - QUITTER
 private val dictionnaireCommandes = mapOf(
     "stop"    to "pkill mpv",
     "quitter"    to "pkill mpv",
+    "suivant" to """echo '{ "command": ["playlist-next"] }' | socat - /tmp/mpv-socket > /dev/null 2>&1 &""",
+    "précédent" to """echo '{"command": ["playlist-prev"] }' | socat - /tmp/mpv-socket > /dev/null 2>&1 &""",
     "culture"    to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/franceculture/franceculture_hifi.m3u8 > /dev/null 2>&1 &",
     "fip culte" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fipcultes/fipcultes_hifi.m3u8 > /dev/null 2>&1 &",
-    "dylan"    to "pkill mpv ; nohup mpv --shuffle '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
-    "douce" to "pkill mpv ; nohup mpv --shuffle /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
-    "tahiti"    to "pkill mpv ; nohup mpv --shuffle '/home/enjoy/Musique/Chants tahitiens traditionnels/' > /dev/null 2>&1 &",
-    "stevens" to "pkill mpv ; nohup mpv --shuffle '/home/enjoy/Musique/Cat Stevens/' > /dev/null 2>&1 &", // Utile pour Raspberry Pi
-    "tous"   to "pkill mpv ; nohup mpv --shuffle /home/enjoy/Musique/ > /dev/null 2>&1 &"
+    "france inter" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8 > /dev/null 2>&1 &",
+    "france musique" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/francemusique/francemusique_hifi.m3u8 > /dev/null 2>&1 &",
+    "radio 50" to "pkill mpv ; nohup mpv https://stream.radio5050.com/hls/live.m3u8 > /dev/null 2>&1 &",
+    "radio fip" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fip/fip_hifi.m3u8 > /dev/null 2>&1 &",
+
+    "dylan" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
+    "douce" to "nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
+    "tahiti" to "pkill mpv ; nohup mpv --shuffle  --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Chants tahitiens traditionnels/' > /dev/null 2>&1 &",
+    "stevens" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Cat Stevens/' > /dev/null 2>&1 &",
+    "tous" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/ > /dev/null 2>&1 &"
 )
+
+//nohup mpv --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &
+//echo '{ "command": ["playlist-next"] }' | socat - /tmp/mpv-socket
+//echo '{ "command": ["playlist-prev"] }' | socat - /tmp/mpv-socket
+
 
 class MainActivity : AppCompatActivity() {
 
