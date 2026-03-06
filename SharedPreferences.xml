@@ -1,0 +1,7 @@
+#!/usr/bin/env python3import os
+
+    #----------------------------------    les radios     ----------------------------------lesradios = {}lesradios["inter"] = "https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8"lesradios["musique"] = "https://stream.radiofrance.fr/francemusique/francemusique_hifi.m3u8"lesradios["culture"] = "https://stream.radiofrance.fr/franceculture/franceculture_hifi.m3u8"lesradios["fip"] = "https://stream.radiofrance.fr/fip/fip_hifi.m3u8"lesradios["culte"] = "https://stream.radiofrance.fr/fipcultes/fipcultes_hifi.m3u8"lesradios["cinquante"] = "https://stream.radio5050.com/hls/live.m3u8"
+
+    #----------------------------------    les playlists     ----------------------------------laplaylist_locale = {}laplaylist_locale["dylan"] ="/media/enjoy/Data/musique//Bob Dylan/"laplaylist_locale["steven"] ='/media/enjoy/Data/musique/Cat\ Stevens/'laplaylist_locale["tahiti"] ="/media/enjoy/Data/musique/Chants tahitiens traditionnels/"laplaylist_locale["sweet"] ="/media/enjoy/Data/musique/sweet/"laplaylist_locale["tous"] ="/media/enjoy/Data/musique/"
+
+    laplaylist_distant = {"dylan": "/home/enjoy/Musique/Bob\ Dylan/","steven": "/home/enjoy/Musique/Cat\ Stevens/","tahiti": "/home/enjoy/Musique/Chants\ tahitiens\ traditionnels/","douce": "/home/enjoy/Musique/sweet/","tous": "/home/enjoy/Musique/",}#--------------------------------------------------------------------------------------------
