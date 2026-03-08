@@ -50,5 +50,4 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // bibliothèque SSH
     implementation(libs.jsch.mwiede)
-    implementation("com.google.android.material:material:1.13.0")
 }

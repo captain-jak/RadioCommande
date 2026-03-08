@@ -14,7 +14,7 @@
     <string name="volume_serveur">Volume of server</string>
     <string name="couper_son">Cut the volume</string>
     <string name="volume">Volume: 50 %</string>
-    <string name="verification">Checking ...</string>
+ <string name="verification">Checking…</string>
     <string name="serveur_connecte">Server: connected</string>
     <string name="serveur_hors_ligne">Server: not on line</string>
     <string name="statut_cle_import_succes">Staus: success of SSH key import</string>

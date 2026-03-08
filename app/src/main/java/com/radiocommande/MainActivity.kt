@@ -206,7 +206,8 @@ class MainActivity : AppCompatActivity() {
         SSHManager.testerConnexion(this) { success ->
             if (success) {
                 tvStatus.text = getString(R.string.serveur_connecte)
-                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Vert
+                //tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Vert
+                tvStatus.setTextColor("#4CAF50".toColorInt())
                 dot.setBackgroundResource(android.R.drawable.presence_online)
             } else {
                 tvStatus.text = getString(R.string.serveur_hors_ligne)
