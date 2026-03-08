@@ -103,7 +103,7 @@ fun telechargerFichier(context: Context, cheminServeur: String, nomFichier: Stri
     val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
     val ip = prefs.getString("ip", "") ?: ""
     val user = prefs.getString("user", "") ?: ""
-    val pass = prefs.getString("pass", "") ?: ""
+    prefs.getString("pass", "") ?: ""
     val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
     val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
     val port = portString.toIntOrNull() ?: 22

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="serveur_deconnecte">Server: disconnected</string>
+    <string name="attente_commande">Waiting for order</string>
+    <string name="microphone">Microphone</string>
+    <string name="configuration_serveur">Server Configuration</string>
+    <string name="adresse_ip">IP Address (192.168.1.50:22)</string>
+    <string name="utilisateur">User (ex pi)</string>
+    <string name="mot_de_passe">SSH Password</string>
+    <string name="telecharger_cle">Download SSK key</string>
+    <string name="importer_cle">Import SSH key</string>
+    <string name="statut_cle">Staus: no key imported</string>
+    <string name="sauvegarder_et_quitter">Save and Quit</string>
+    <string name="volume_serveur">Volume of server</string>
+    <string name="couper_son">Cut the volume</string>
+    <string name="volume">Volume: 50 %</string>
+    <string name="verification">Checking ...</string>
+    <string name="serveur_connecte">Server: connected</string>
+    <string name="serveur_hors_ligne">Server: not on line</string>
+    <string name="statut_cle_import_succes">Staus: success of SSH key import</string>
+    <string name="volume_muet">Volume: none</string>
+    <string name="volume_du_serveur">Server volume: %1$d%%</string>
+    <string name="volume_format">Volume: %1$d%%</string>
+</resources>

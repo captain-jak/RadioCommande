@@ -1,6 +1,6 @@
 <!-- RadioCommande2 -->
 <resources>
-	<string name="radiocommande">RadioCommande</string>
+	<string name="radiocommande" translatable="false">RadioCommande</string>
 	<string name="serveur_deconnecte">Serveur : Déconnecté</string>
 	<string name="attente_commande">Attente de commande&#8230;\n</string>
 	<string name="microphone">Microphone</string>
