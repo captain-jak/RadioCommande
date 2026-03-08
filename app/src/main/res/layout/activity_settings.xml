@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Configuration Serveur"
+        android:text="@string/configuration_serveur"
         android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginBottom="20dp" />
@@ -21,14 +21,14 @@
         android:id="@+id/etIp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Adresse IP (ex: 192.168.1.50:22)"
+        android:hint="@string/adresse_ip"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/etUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Utilisateur (ex: pi)"
+        android:hint="@string/utilisateur"
         android:inputType="text" />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -42,7 +42,7 @@
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Mot de passe SSH"
+            android:hint="@string/mot_de_passe"
             android:inputType="textPassword" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -51,21 +51,21 @@
         android:id="@+id/btnLoadKey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Télécharger la clé SSH"
+        android:text="@string/telecharger_cle"
         android:layout_marginTop="16dp" />
 
     <Button
         android:id="@+id/btnImportKey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Importer une clé privée SSH"
+        android:text="@string/importer_cle"
         android:layout_marginTop="16dp" />
 
     <TextView
         android:id="@+id/tvKeyStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Statut : Aucune clé importée"
+        android:text="@string/statut_cle"
         android:textSize="12sp" />
 
     <Button
@@ -73,12 +73,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Sauvegarder et Quitter" />
+        android:text="@string/sauvegarder_et_quitter" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Volume du Serveur"
+        android:text="@string/volume_serveur"
         android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginTop="30dp"
@@ -95,7 +95,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Couper le son"
+            android:contentDescription="@string/couper_son"
             android:src="@android:drawable/ic_lock_silent_mode_off" />
 
         <LinearLayout
@@ -109,7 +109,7 @@
                 android:id="@+id/tvVolumeLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Volume : 50%" />
+                android:text="@string/volume" />
 
             <SeekBar
                 android:id="@+id/sbVolume"

@@ -1,5 +1,5 @@
 package com.radiocommande
-
+//RadioCommande2
 import android.content.Context
 import com.jcraft.jsch.ChannelExec
 
@@ -11,6 +11,7 @@ import java.io.FileOutputStream
 object SSHManager {
     //  Test de connexion SSH
     fun testerConnexion(context: Context, callback: (Boolean) -> Unit) {
+        // Récupération sécurisée des données
         val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
         val ip = prefs.getString("ip", "") ?: ""
         val user = prefs.getString("user", "") ?: ""
@@ -19,6 +20,7 @@ object SSHManager {
         val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
         val port = portString.toIntOrNull() ?: 22
 
+        // On lance le test dans un Thread pour ne pas bloquer l'écran
         Thread {
             try {
                 val jsch = com.jcraft.jsch.JSch()

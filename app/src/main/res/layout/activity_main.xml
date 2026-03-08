@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="RadioCommande"
+        android:text="@string/radiocommande"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -40,7 +40,7 @@
             android:id="@+id/tvStatusConnexion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Serveur : Déconnecté"
+            android:text="@string/serveur_deconnecte"
             android:textColor="#AAAAAA"
             android:textSize="12sp" />
     </LinearLayout>
@@ -81,7 +81,7 @@
             android:id="@+id/tvConsole"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Attente de commande...\n> "
+            android:text="@string/attente_commande"
             android:textColor="#00FF00" 
             android:fontFamily="monospace" />
     </androidx.core.widget.NestedScrollView>
@@ -91,7 +91,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
-        android:contentDescription="Microphone"
+        android:contentDescription="@string/microphone"
         app:backgroundTint="#FF5722"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

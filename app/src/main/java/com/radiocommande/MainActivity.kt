@@ -1,5 +1,5 @@
 package com.radiocommande
-
+// RadioCommande2
 import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -17,11 +17,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
+import androidx.core.graphics.toColorInt
 
 //import android.content.Context
 
 // mot cles reserves (a ne pas utiliser dans le dictionnaire
-// CHERCHE -- SUIVANT -- PRECEDENT - QUITTER
+// CHERCHE -- SUIVANT -- PRECEDENT - QUITTER -- PLAYLIST
 private val dictionnaireCommandes = mapOf(
     "stop"    to "pkill mpv",
     "quitter"    to "pkill mpv",
@@ -143,6 +144,15 @@ class MainActivity : AppCompatActivity() {
                 if (mot.isNotEmpty()) {
                     chercherFichierSurServeur("/home/enjoy/Musique/", mot)
                 }
+             // ------   Cas spécial lecture d'un répertoire  --------------------------------------------------------------------
+             } else if  (texte.contains("playlist")){
+                 updateConsole("Je cherche '$texte'")
+                val mot = texte.replace("playlist ", "").trim()
+                updateConsole("Je cherche apres trim: '$mot'")
+                if (mot.isNotEmpty()) {
+                    chercherRepertoireSurServeur("/home/enjoy/Musique/", mot)
+                }
+            //------------------------------------------------------------------------------------------------------------------------------
             } else {
                parler("Désolé, cette commande n'est pas dans mon dictionnaire.")
                updateConsole("Système : Commande '$texte' inconnue.")
@@ -151,7 +161,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 //-------------------------------      Recherche d'un morceau sur le serveur      ---------------------------------------
-
     private fun chercherFichierSurServeur(repertoire: String, motCle: String) {
          // Construction de la commande find
         val commande = "pkill mpv; find '$repertoire' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
@@ -160,9 +169,16 @@ class MainActivity : AppCompatActivity() {
         SSHManager.executerCommandeSSH(this, commande)
     }
 
+    //-------------------------------      Recherche d'un Répertoire sur le serveur      ---------------------------------------
+    private fun chercherRepertoireSurServeur(repertoire: String, motCle: String) {
+         // Construction de la commande find
+        val commande = "pkill mpv; find '$repertoire' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
+        updateConsole("la commande:  '$commande'")
+        // Utilisation de votre SSHManager
+        SSHManager.executerCommandeSSH(this, commande)
+    }
+
 //-------------------------------      Lecture audio de texte      ---------------------------------------
-
-
     private fun updateConsole(msg: String) {
         runOnUiThread {
             tvConsole.append("\n$msg")
@@ -176,7 +192,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 //-------------------------------      Lecture audio de texte      ---------------------------------------
-
     private fun parler(message: String) {
         if (::tts.isInitialized) { // Vérifie si tts a été bien créé
             tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
@@ -184,25 +199,23 @@ class MainActivity : AppCompatActivity() {
     }
 
 //-------------------------------      Verifier le statut du serveur     ---------------------------------------
-
     private fun verifierStatutServeur() {
         val tvStatus = findViewById<TextView>(R.id.tvStatusConnexion)
         val dot = findViewById<View>(R.id.viewStatusDot)
-        tvStatus.text = "Vérification..."
+        tvStatus.text = getString(R.string.verification)
         SSHManager.testerConnexion(this) { success ->
             if (success) {
-                tvStatus.text = "Serveur : Connecté"
+                tvStatus.text = getString(R.string.serveur_connecte)
                 tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Vert
                 dot.setBackgroundResource(android.R.drawable.presence_online)
             } else {
-                tvStatus.text = "Serveur : Hors ligne"
+                tvStatus.text = getString(R.string.serveur_hors_ligne)
                 tvStatus.setTextColor(android.graphics.Color.RED)
                 dot.setBackgroundResource(android.R.drawable.presence_offline)
             }
         }
     }
 //-------------------------------      Anilmation d'un bouton     ---------------------------------------
-
     private fun startPulseAnimation() {
         pulseView.visibility = View.VISIBLE
         val scaleX = ObjectAnimator.ofFloat(pulseView, "scaleX", 1f, 2f)
@@ -228,5 +241,4 @@ class MainActivity : AppCompatActivity() {
         }
         super.onDestroy()
     }
-    
 }

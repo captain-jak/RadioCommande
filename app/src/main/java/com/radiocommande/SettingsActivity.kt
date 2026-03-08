@@ -1,5 +1,5 @@
 package com.radiocommande
-
+// RadioCommande2
 //import android.content.Context
 import android.os.Bundle
 import android.widget.*
@@ -18,7 +18,8 @@ class SettingsActivity : AppCompatActivity() {
             if (content != null) {
                 val file = File(filesDir, "ssh_key")
                 file.writeText(content)
-                findViewById<TextView>(R.id.tvKeyStatus).text = "Statut : Clé importée avec succès"
+                findViewById<TextView>(R.id.tvKeyStatus).text =
+                    getString(R.string.statut_cle_import_succes)
                 Toast.makeText(this, "Clé SSH enregistrée", Toast.LENGTH_SHORT).show()
             }
         }
@@ -56,18 +57,19 @@ class SettingsActivity : AppCompatActivity() {
              if (isMuted) {
                  SSHManager.executerCommandeSSH(this, "pactl set-sink-mute @DEFAULT_SINK@ 1")
                  btnMute.setImageResource(android.R.drawable.ic_lock_silent_mode)
-                 tvVolumeLabel.text = "Volume : MUET"
+                 tvVolumeLabel.text = getString(R.string.volume_muet)
             } else {
                 SSHManager.executerCommandeSSH(this, "pactl set-sink-mute @DEFAULT_SINK@ 0")
                 btnMute.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
-                tvVolumeLabel.text = "Volume : ${sbVolume.progress}%"
+                //tvVolumeLabel.text = getString(R.string.volume3, sbVolume.progress)
+            tvVolumeLabel.text = getString(R.string.volume_format, sbVolume.progress)
             }
         }
 
         // --- GESTION VOLUME ---
         sbVolume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                tvVolumeLabel.text = "Volume du Serveur : $progress%"
+                tvVolumeLabel.text = getString(R.string.volume_du_serveur, progress)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
