@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
                 val mot = texte.replace("cherche ", "").trim()
                 updateConsole("Je cherche apres trim: '$mot'")
                 if (mot.isNotEmpty()) {
-                    chercherFichierSurServeur("/home/enjoy/Musique/", mot)
+                    chercherFichierSurServeur(mot)
                 }
              // ------   Cas spécial lecture d'un répertoire  --------------------------------------------------------------------
              } else if  (texte.contains("playlist")){
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 val mot = texte.replace("playlist ", "").trim()
                 updateConsole("Je cherche apres trim: '$mot'")
                 if (mot.isNotEmpty()) {
-                    chercherRepertoireSurServeur("/home/enjoy/Musique/", mot)
+                    chercherRepertoireSurServeur(mot)
                 }
             //------------------------------------------------------------------------------------------------------------------------------
             } else {
