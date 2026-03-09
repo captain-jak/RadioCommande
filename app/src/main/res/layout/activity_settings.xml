@@ -22,14 +22,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/adresse_ip"
-        android:inputType="text" />
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:autofillHints="none" />
 
     <EditText
         android:id="@+id/etUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/utilisateur"
-        android:inputType="text" />
+        android:importantForAutofill="no" android:inputType="text"
+        android:autofillHints="none" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
