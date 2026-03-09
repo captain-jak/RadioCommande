@@ -4,9 +4,6 @@ import android.content.Context
 import com.jcraft.jsch.ChannelExec
 
 //  telechargement de cle
-import com.jcraft.jsch.ChannelSftp
-import java.io.File
-import java.io.FileOutputStream
 
 object SSHManager {
     //  Test de connexion SSH
@@ -43,9 +40,10 @@ object SSHManager {
                      callback(isConnected)
                 }
             } catch (e: Exception) {
-                (context as? android.app.Activity)?.runOnUiThread {
-                     callback(false)
-                }
+                //(context as? android.app.Activity)?.runOnUiThread {
+                 //    callback(false)
+                //}
+                android.util.Log.e("ErreurServeur", "Impossible de contacter le serveur", e)
             }
         }.start()
     }
@@ -99,59 +97,59 @@ object SSHManager {
 }
 
 // Dans votre object SSHManager
-fun telechargerFichier(context: Context, cheminServeur: String, nomFichier: String) {
-    val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
-    val ip = prefs.getString("ip", "") ?: ""
-    val user = prefs.getString("user", "") ?: ""
-    prefs.getString("pass", "") ?: ""
-    val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
-    val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
-    val port = portString.toIntOrNull() ?: 22
-    // On ne récupère plus le mot de passe, mais le chemin de la clé si besoin
+//fun telechargerFichier(context: Context, cheminServeur: String, nomFichier: String) {
+//    val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
+//    val ip = prefs.getString("ip", "") ?: ""
+//    val user = prefs.getString("user", "") ?: ""
+//    prefs.getString("pass", "") ?: ""
+//    val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
+//    val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
+//    val port = portString.toIntOrNull() ?: 22
+//    // On ne récupère plus le mot de passe, mais le chemin de la clé si besoin
     
-    Thread {
-        try {
-            val jsch = com.jcraft.jsch.JSch()
+//    Thread {
+//        try {
+//            val jsch = com.jcraft.jsch.JSch()
             
-            // --- CONFIGURATION DE LA CLÉ PRIVÉE ---
-            // Supposons que votre clé est dans les fichiers internes de l'app
-            val pathKey = File(context.filesDir, "id_rsa").absolutePath
-            jsch.addIdentity(pathKey)
+//            // --- CONFIGURATION DE LA CLÉ PRIVÉE ---
+//            // Supposons que votre clé est dans les fichiers internes de l'app
+//            val pathKey = File(context.filesDir, "id_rsa").absolutePath
+//            jsch.addIdentity(pathKey)
 
-            val session = jsch.getSession(user, lip, port)
-            val config = java.util.Properties()
-            config["StrictHostKeyChecking"] = "no"
-            session.setConfig(config)
-            session.connect(3000)
+//            val session = jsch.getSession(user, lip, port)
+//            val config = java.util.Properties()
+//            config["StrictHostKeyChecking"] = "no"
+//            session.setConfig(config)
+//            session.connect(3000)
 
-            // Ouverture du canal SFTP
-            val channel = session.openChannel("sftp") as ChannelSftp
-            channel.connect()
+//            // Ouverture du canal SFTP
+//            val channel = session.openChannel("sftp") as ChannelSftp
+//            channel.connect()
 
-            // Dossier de destination sur le téléphone (Téléchargements)
-            val localDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
-            val localFile = File(localDir, nomFichier)
+//            // Dossier de destination sur le téléphone (Téléchargements)
+//            val localDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+//            val localFile = File(localDir, nomFichier)
             
-            val outputStream = FileOutputStream(localFile)
+//            val outputStream = FileOutputStream(localFile)
             
-            // Téléchargement effectif
-            channel.get(cheminServeur, outputStream)
+//            // Téléchargement effectif
+//            channel.get(cheminServeur, outputStream)
 
-            outputStream.close()
-            channel.disconnect()
-            session.disconnect()
+//            outputStream.close()
+//            channel.disconnect()
+//            session.disconnect()
 
-            (context as? android.app.Activity)?.runOnUiThread {
-                android.widget.Toast.makeText(context, "Téléchargé dans Downloads !", android.widget.Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            (context as? android.app.Activity)?.runOnUiThread {
-                android.widget.Toast.makeText(context, "Erreur SFTP : ${e.message}", android.widget.Toast.LENGTH_LONG).show()
-            }
-        }
-    }.start()
-}
+//            (context as? android.app.Activity)?.runOnUiThread {
+//                android.widget.Toast.makeText(context, "Téléchargé dans Downloads !", android.widget.Toast.LENGTH_SHORT).show()
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            (context as? android.app.Activity)?.runOnUiThread {
+//                android.widget.Toast.makeText(context, "Erreur SFTP : ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+//            }
+//        }
+//    }.start()
+//}
 
 
 ///----------------------------      connexion SSH avec cle -------------------------
