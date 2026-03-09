@@ -42,13 +42,10 @@ private val dictionnaireCommandes = mapOf(
     "tous" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/ > /dev/null 2>&1 &"
 )
 
-//nohup mpv --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &
-//echo '{ "command": ["playlist-next"] }' | socat - /tmp/mpv-socket
-//echo '{ "command": ["playlist-prev"] }' | socat - /tmp/mpv-socket
-
-
 class MainActivity : AppCompatActivity() {
-
+    companion object {
+        private const val REPERTOIRE_MUSIQUE = "/home/enjoy/Musique/"
+    }
     private lateinit var tvConsole: TextView
     private lateinit var pulseView: View
     private lateinit var tts: TextToSpeech
@@ -161,18 +158,18 @@ class MainActivity : AppCompatActivity() {
     }
 
 //-------------------------------      Recherche d'un morceau sur le serveur      ---------------------------------------
-    private fun chercherFichierSurServeur(repertoire: String, motCle: String) {
+    private fun chercherFichierSurServeur(motCle: String) {
          // Construction de la commande find
-        val commande = "pkill mpv; find '$repertoire' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
+        val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
         updateConsole("la commande:  '$commande'")
         // Utilisation de votre SSHManager
         SSHManager.executerCommandeSSH(this, commande)
     }
 
     //-------------------------------      Recherche d'un Répertoire sur le serveur      ---------------------------------------
-    private fun chercherRepertoireSurServeur(repertoire: String, motCle: String) {
+    private fun chercherRepertoireSurServeur(motCle: String) {
          // Construction de la commande find
-        val commande = "pkill mpv; find '$repertoire' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
+        val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
         updateConsole("la commande:  '$commande'")
         // Utilisation de votre SSHManager
         SSHManager.executerCommandeSSH(this, commande)
