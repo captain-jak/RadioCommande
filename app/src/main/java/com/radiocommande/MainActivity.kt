@@ -20,6 +20,9 @@ import java.util.*
 import androidx.core.graphics.toColorInt
 
 //import android.content.Context
+//CHEMIN_AUDIO=$(locate -i -d /home/enjoy/musique.db "*blood*" | sed -n "${OCCURENCE}p")
+//echo "Le fichier sélectionné est : $CHEMIN_AUDIO"
+//mpv --no-video "$CHEMIN_AUDIO"
 
 // mot cles reserves (a ne pas utiliser dans le dictionnaire
 // CHERCHE -- SUIVANT -- PRECEDENT - QUITTER -- PLAYLIST
@@ -34,12 +37,13 @@ private val dictionnaireCommandes = mapOf(
     "france musique" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/francemusique/francemusique_hifi.m3u8 > /dev/null 2>&1 &",
     "radio 50" to "pkill mpv ; nohup mpv https://stream.radio5050.com/hls/live.m3u8 > /dev/null 2>&1 &",
     "radio fip" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fip/fip_hifi.m3u8 > /dev/null 2>&1 &",
+    "radio catho" to "pkill mpv ; nohup mpv https://liveradiokto.akamaized.net/hls/live/20000054/ktoradio/02.m3u8> /dev/null 2>&1 &",
 
     "dylan" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
     "douce" to "nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
     "tahiti" to "pkill mpv ; nohup mpv --shuffle  --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Chants tahitiens traditionnels/' > /dev/null 2>&1 &",
     "stevens" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Cat Stevens/' > /dev/null 2>&1 &",
-    "tous" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/ > /dev/null 2>&1 &"
+    "tous" to "pkill mpv ; nohup pki > /dev/null 2>&1 &"
 )
 
 class MainActivity : AppCompatActivity() {
@@ -107,7 +111,6 @@ class MainActivity : AppCompatActivity() {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR")
             putExtra(RecognizerIntent.EXTRA_PROMPT, "Dites une commande...")
         }
-        
         try {
             isListening = true
             startPulseAnimation()
@@ -120,58 +123,100 @@ class MainActivity : AppCompatActivity() {
 //-------------------------------      Commande a envoyer au serveur      ---------------------------------------
 
     private fun interpreterEtEnvoyer(texte: String) {
-        var commandeAExecuter: String? = null
-        // On parcourt le dictionnaire pour voir si un mot-clé est dans le texte entendu
-        for ((cle, commande) in dictionnaireCommandes) {
-            if (texte.contains(cle)) {
-                commandeAExecuter = commande
-                break // On s'arrête au premier mot trouvé
-            }
-        }
-        if (commandeAExecuter != null) {
-            updateConsole("Action : Recherche de '$commandeAExecuter'...")
-            android.util.Log.d("SSH_COMMAND", "Exécution de mainactivity : $commandeAExecuter")
-            SSHManager.executerCommandeSSH(this, commandeAExecuter)
-        } else {
-            parler("OK, je cherche.")
-            // Cas spécial pour la recherche dynamique (ex: "cherche erreur")
-            if (texte.contains("cherche")) {
-                updateConsole("Je cherche '$texte'")
-                val mot = texte.replace("cherche ", "").trim()
-                updateConsole("Je cherche apres trim: '$mot'")
-                if (mot.isNotEmpty()) {
-                    chercherFichierSurServeur(mot)
-                }
-             // ------   Cas spécial lecture d'un répertoire  --------------------------------------------------------------------
-             } else if  (texte.contains("playlist")){
-                 updateConsole("Je cherche '$texte'")
-                val mot = texte.replace("playlist ", "").trim()
-                updateConsole("Je cherche apres trim: '$mot'")
-                if (mot.isNotEmpty()) {
-                    chercherRepertoireSurServeur(mot)
-                }
-            //------------------------------------------------------------------------------------------------------------------------------
-            } else {
-               parler("Désolé, cette commande n'est pas dans mon dictionnaire.")
-               updateConsole("Système : Commande '$texte' inconnue.")
-            }
+    var commandeAExecuter: String? = null
+
+    // Cherche dans le dictionnaire si un mot-clé correspond
+    for ((cle, commande) in dictionnaireCommandes) {
+        if (texte.contains(cle)) {
+            commandeAExecuter = commande
+            break
         }
     }
+    if (commandeAExecuter != null) {
+        // Commande fixe trouvée dans le dictionnaire
+        android.util.Log.d("SSH_COMMAND", "MainActivity 135 : $commandeAExecuter")
+        SSHManager.executerCommandeSSH(this, commandeAExecuter) { reussite, nomFichier ->
+            if (reussite) {
+                updateConsole("Commande envoyée : ${nomFichier ?: "OK"}")
+                android.util.Log.d("SSH_COMMAND", "MainActivity 139 : ${nomFichier ?: "OK"}")
+            } else {
+                updateConsole("Erreur d'exécution SSH !")
+                android.util.Log.d("SSH_COMMAND", "MainActivity 142 : ${nomFichier ?: "raté"}")
+            }
+        }
+        
+    } else if (texte.contains("cherche") || texte.contains("look for")) {
+        // Cas dynamique : recherche de fichier
+        val mot = texte.replace("cherche ", "").trim()
+        if (mot.isNotEmpty()) {
+            updateConsole("Je cherche : '$mot'")
+            chercherFichierSurServeur(mot)
+        } else {
+            parler("Je n'ai pas compris ce que vous voulez chercher.")
+        }
+    } else if (texte.contains("playlist")) {
+        // Cas dynamique : lecture d'un répertoire
+        val mot = texte.replace("playlist ", "").trim()
+        if (mot.isNotEmpty()) {
+            updateConsole("Recherche playlist : '$mot'")
+            chercherRepertoireSurServeur(mot)
+        } else {
+            parler("Je n'ai pas compris le nom de la playlist.")
+        }
+    } else {
+        // Commande inconnue
+        parler("Désolé, cette commande n'est pas dans mon dictionnaire.")
+        updateConsole("Commande inconnue : '$texte'")
+    }
+}
 
 //-------------------------------      Recherche d'un morceau sur le serveur      ---------------------------------------
-    private fun chercherFichierSurServeur(motCle: String) {
-         // Construction de la commande find
-        val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
-        updateConsole("la commande:  '$commande'")
-        // Utilisation de votre SSHManager
-        SSHManager.executerCommandeSSH(this, commande)
+   private fun chercherFichierSurServeur(motCle: String) {
+    //--1- Recherche du mot clé
+    val cmdRecherche = """pkill mpv; locate -i -d /home/enjoy/musique.db "*${motCle}*""""
+    SSHManager.executerCommandeSSH(this, cmdRecherche) { reussite, resultat ->
+        //--2- Si recherche positive, lancement de mpv
+        android.util.Log.d("SSH_COMMAND", "MainActivity 180 - $resultat")
+        updateConsole("Vous écoutez $resultat.")
+        val cmdLire = """mpv --no-video "$resultat" > /dev/null 2>&1 &"""
+        SSHManager.executerCommandeSSH(this, cmdLire) { reussite, resultat ->
+//#=>            if (reussite) {
+//#=>                updateConsole("Lecture du fichier : $resultat")
+//#=>            } else {
+//#=>                updateConsole("Erreur lors de la lecture de $resultat.")
+//#=>            }
+        }
     }
+}
+//        if (reussite && !resultat.isNullOrBlank()) {
+//            // Transformer le résultat en liste
+//            android.util.Log.d("SSH_COMMAND", "MainActivity 183 - Reussite $resultat")
+//            val listeFichiers = resultat.split("\n").filter { it.isNotBlank() }
+//            val indexCible = 0
+//            if (indexCible in listeFichiers.indices) {
+//                val cheminAudio = listeFichiers[indexCible]
+//                 android.util.Log.d("SSH_COMMAND", "MainActivity 187 - $cheminAudio")
+//                 updateConsole("Vous écoutez : $cheminAudio")
+//                val cmdLire = """mpv --no-video "$cheminAudio" > /dev/null 2>&1 &"""
+                
+                //CHEMIN_AUDIO=$(locate -i -d /home/enjoy/musique.db "*blood*" | sed -n "${OCCURENCE}p")
+                //echo "Le fichier sélectionné est : $CHEMIN_AUDIO"
+                //mpv --no-video "$CHEMIN_AUDIO"
+               // val cmdLire = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
+//            } else {
+//                updateConsole("Aucun fichier trouvé pour '$motCle'")
+//            }
+//        } else {
+//            updateConsole("Erreur SSH ou aucun résultat pour '$motCle'")
+//        }
+//    }
+
 
     //-------------------------------      Recherche d'un Répertoire sur le serveur      ---------------------------------------
     private fun chercherRepertoireSurServeur(motCle: String) {
          // Construction de la commande find
         val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
-        updateConsole("la commande:  '$commande'")
+        //updateConsole("la commande:  '$commande'")
         // Utilisation de votre SSHManager
         SSHManager.executerCommandeSSH(this, commande)
     }
@@ -180,7 +225,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateConsole(msg: String) {
         runOnUiThread {
             tvConsole.append("\n$msg")
-        
             // On utilise android.widget.ScrollView ici pour correspondre au XML
             val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
             scroll?.post { 
