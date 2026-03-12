@@ -19,9 +19,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 import androidx.core.graphics.toColorInt
 
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.*
-
 //import android.content.Context
 
 // mot cles reserves (a ne pas utiliser dans le dictionnaire
@@ -37,7 +34,6 @@ private val dictionnaireCommandes = mapOf(
     "france musique" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/francemusique/francemusique_hifi.m3u8 > /dev/null 2>&1 &",
     "radio 50" to "pkill mpv ; nohup mpv https://stream.radio5050.com/hls/live.m3u8 > /dev/null 2>&1 &",
     "radio fip" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fip/fip_hifi.m3u8 > /dev/null 2>&1 &",
-     "radio catho" to "pkill mpv ; nohup mpv https://liveradiokto.akamaized.net/hls/live/20000054/ktoradio/02.m3u8 > /dev/null 2>&1 &",
 
     "dylan" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
     "douce" to "nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
@@ -54,9 +50,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pulseView: View
     private lateinit var tts: TextToSpeech
     private var isListening = false
-    //------ 12-03-2026 --------------------
-    private var musiqueJob: kotlinx.coroutines.Job? = null
-    //------------------------------------------
 
     // Gestion du retour de la reconnaissance vocale
     private val getSpeechInput = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -105,9 +98,6 @@ class MainActivity : AppCompatActivity() {
         btnMic.setOnClickListener {
             lancerEcouteVocale()
         }
-            //------ 12-03-2026 --------------------
-
-        //-------------------------------------------------------------------
     }
 
 //-------------------------------      Lancer l'ecoute vocale      ---------------------------------------
@@ -139,30 +129,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (commandeAExecuter != null) {
-            //updateConsole("Action : Recherche de '$commandeAExecuter'...")
-            android.util.Log.d("SSH_COMMAND", "MainActivity-133 : $commandeAExecuter")
-            Thread {SSHManager.executerCommandeSSH(this, commandeAExecuter)}.start()
+            updateConsole("Action : Recherche de '$commandeAExecuter'...")
+            android.util.Log.d("SSH_COMMAND", "Exécution de mainactivity : $commandeAExecuter")
+            SSHManager.executerCommandeSSH(this, commandeAExecuter)
         } else {
             parler("OK, je cherche.")
             // Cas spécial pour la recherche dynamique (ex: "cherche erreur")
             if (texte.contains("cherche")) {
-                //updateConsole("Je cherche '$texte'")
+                updateConsole("Je cherche '$texte'")
                 val mot = texte.replace("cherche ", "").trim()
-                //updateConsole("Je cherche apres trim: '$mot'")
+                updateConsole("Je cherche apres trim: '$mot'")
                 if (mot.isNotEmpty()) {
                     chercherFichierSurServeur(mot)
                 }
              // ------   Cas spécial lecture d'un répertoire  --------------------------------------------------------------------
              } else if  (texte.contains("playlist")){
-                //updateConsole("Je cherche '$texte'")
+                 updateConsole("Je cherche '$texte'")
                 val mot = texte.replace("playlist ", "").trim()
-                //updateConsole("Je cherche apres trim: '$mot'")
+                updateConsole("Je cherche apres trim: '$mot'")
                 if (mot.isNotEmpty()) {
                     chercherRepertoireSurServeur(mot)
                 }
             //------------------------------------------------------------------------------------------------------------------------------
             } else {
-               parler("commande inexistante")
+               parler("Désolé, cette commande n'est pas dans mon dictionnaire.")
                updateConsole("Système : Commande '$texte' inconnue.")
             }
         }
@@ -170,42 +160,20 @@ class MainActivity : AppCompatActivity() {
 
 //-------------------------------      Recherche d'un morceau sur le serveur      ---------------------------------------
     private fun chercherFichierSurServeur(motCle: String) {
-         // 1- Recherche le fichier dans la base de données musicale 
-        val cmdRecherche = """locate -i -d /home/enjoy/musique.db "*$motCle*""""
-        arreterSurveillance()
-        // Lancement d'un Thread pour ne pas bloquer l'écran
-        Thread {
-            val resultat = SSHManager.executerCommandeSSH(this, cmdRecherche)
-            val listeFichiers = resultat
-            .split("\n")
-            .filter { it.isNotBlank() }
-            // Choisir l’index (ici le premier)
-            val indexCible = 0
-            // Vérifier que l’index est valide
-            if (indexCible in listeFichiers.indices) {
-                val cheminAudio = listeFichiers[indexCible]
-                val nom = cheminAudio.substringAfterLast("/")
-                android.util.Log.d("SSH_COMMAND", "MainActivity-186 : $cheminAudio")
-        // 2- Execution mpv
-                val cmdLire = """pkill mpv; mpv --no-video --input-ipc-server=/tmp/mpvsocket "$cheminAudio" > /dev/null 2>&1 &"""
-                SSHManager.executerCommandeSSH(this, cmdLire)
-                updateConsole("Vous écoutez : $nom")
-                //lecture=recupererMusiqueDistante()
-                //updateConsole("Lecture de :  '$lecture'")
-            } else {
-                println("Index invalide")
-            }
-        }.start()
+         // Construction de la commande find
+        val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type f -iname *'$motCle'* -print -quit | xargs -d '\n' mpv > /dev/null 2>&1 &"
+        updateConsole("la commande:  '$commande'")
+        // Utilisation de votre SSHManager
+        SSHManager.executerCommandeSSH(this, commande)
     }
 
-    //----------------------------      Recherche d'un Répertoire sur le serveur      ---------------------------------------
+    //-------------------------------      Recherche d'un Répertoire sur le serveur      ---------------------------------------
     private fun chercherRepertoireSurServeur(motCle: String) {
          // Construction de la commande find
         val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
         updateConsole("la commande:  '$commande'")
         // Utilisation de votre SSHManager
-        Thread {SSHManager.executerCommandeSSH(this, commande)}.start()
-        surveillerMusique()
+        SSHManager.executerCommandeSSH(this, commande)
     }
 
 //-------------------------------      Lecture audio de texte      ---------------------------------------
@@ -217,16 +185,6 @@ class MainActivity : AppCompatActivity() {
             val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
             scroll?.post { 
                 scroll.fullScroll(View.FOCUS_DOWN) 
-            }
-        }
-    }
-    private fun clearConsole() {
-        runOnUiThread {
-            tvConsole.text = "" // On vide le texte
-            // Optionnel : On remet le scroll en haut
-            val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
-            scroll?.post { 
-                scroll.fullScroll(View.FOCUS_UP) 
             }
         }
     }
@@ -282,62 +240,4 @@ class MainActivity : AppCompatActivity() {
         }
         super.onDestroy()
     }
-
-   fun recupererMusiqueDistante(ssh: SSHManager): String? {
-    // La commande JSON pour MPV
-    val command = "echo '{ \"command\": [\"get_property\", \"media-title\"] }' | socat - /tmp/mpvsocket"
-    return try {
-        // On suppose que SSHManager.execute(cmd) lance la commande et retourne le stdout
-        val response = ssh.execute(command) 
-        
-        // La réponse ressemble à : {"data":"Nom de la musique","error":"success"}
-        // On extrait proprement la valeur de "data"
-        parseMpvResponse(response)
-       } catch (e: Exception) {
-            println("Erreur SSH : ${e.message}")
-            null
-        }
-    }
-
-    fun parseMpvResponse(json: String): String {
-        // Extraction rapide sans bibliothèque lourde
-        return json.substringAfter("\"data\":\"").substringBefore("\"")
-    }
-
-       //----------------Affichage du morceau en train de jouer --------------
-    fun surveillerMusique() {
-        // On annule l'ancien job s'il tournait déjà pour éviter les doublons
-        musiqueJob?.cancel()
-        android.util.Log.d("SSH_COMMAND", "MainActivity-316 :surveille musique")
-        // Note : Pensez à utiliser lifecycleScope si vous êtes dans une Activity
-        musiqueJob = lifecycleScope.launch {
-        //CoroutineScope(Dispatchers.Main).launch {
-            while (isActive) {
-                // On précise explicitement que withContext va retourner une String
-                val result = withContext<String>(Dispatchers.IO) {
-                    val cmd = "echo '{ \"command\": [\"get_property\", \"media-title\"] }' | socat - /tmp/mpvsocket"
-                    SSHManager.execute(cmd) // Cette fonction doit retourner un String
-                }
-                // Extraction du titre
-                val titre = if (result.contains("\"data\":\"")) {
-                    result.substringAfter("\"data\":\"").substringBefore("\"")
-                } else {
-                    "Aucune musique"
-                }
-                // Mise à jour de votre UI ici
-                println("Lecture en cours : $titre")
-                android.util.Log.d("SSH_COMMAND", "MainActivity-335 : $result")
-               clearConsole()
-               updateConsole("En cours : $titre")
-               delay(2000) 
-            }
-        }
-    }
-    fun arreterSurveillance() {
-        musiqueJob?.cancel() // Arrête net la boucle while(isActive)
-        musiqueJob = null
-        updateConsole("Surveillance MPV désactivée.")
-    }
 }
-
-

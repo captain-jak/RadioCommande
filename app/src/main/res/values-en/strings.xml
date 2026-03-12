@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <string name="serveur_deconnecte">Server: disconnected</string>
+    <string name="radiocommande">RadioCommand</string>
+    <string name="serveur_deconnecte">Server: disconnected</string>
     <string name="attente_commande">Waiting for order</string>
     <string name="microphone">Microphone</string>
     <string name="configuration_serveur">Server Configuration</string>
