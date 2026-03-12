@@ -50,4 +50,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // bibliothèque SSH
     implementation(libs.jsch.mwiede)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 }

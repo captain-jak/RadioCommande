@@ -55,11 +55,11 @@ class SettingsActivity : AppCompatActivity() {
         btnMute.setOnClickListener {
              isMuted = !isMuted
              if (isMuted) {
-                 SSHManager.executerCommandeSSH(this, "pactl set-sink-mute @DEFAULT_SINK@ 1")
+                 Thread{SSHManager.executerCommandeSSH(this, "pactl set-sink-mute @DEFAULT_SINK@ 1")}.start()
                  btnMute.setImageResource(android.R.drawable.ic_lock_silent_mode)
                  tvVolumeLabel.text = getString(R.string.volume_muet)
             } else {
-                SSHManager.executerCommandeSSH(this, "pactl set-sink-mute @DEFAULT_SINK@ 0")
+                Thread{SSHManager.executerCommandeSSH(this, "pactl set-sink-mute @DEFAULT_SINK@ 0")}.start()
                 btnMute.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
                 //tvVolumeLabel.text = getString(R.string.volume3, sbVolume.progress)
             tvVolumeLabel.text = getString(R.string.volume_format, sbVolume.progress)
@@ -74,7 +74,7 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                  val volumeValue = seekBar?.progress ?: 50
-                 SSHManager.executerCommandeSSH(this@SettingsActivity, "pactl set-sink-volume @DEFAULT_SINK@ ${volumeValue}%")
+                 Thread{SSHManager.executerCommandeSSH(this@SettingsActivity, "pactl set-sink-volume @DEFAULT_SINK@ ${volumeValue}%")}.start()
             }
         })
 
