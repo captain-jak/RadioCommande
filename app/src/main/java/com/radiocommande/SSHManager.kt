@@ -3,7 +3,7 @@ package com.radiocommande
 import android.content.Context
 import com.jcraft.jsch.ChannelExec
 import java.io.InputStream
-import com.jcraft.jsch.JSch
+//import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 
 //  telechargement de cle
@@ -108,7 +108,7 @@ object SSHManager {
         return result.trim()
     }
     
-    fun disconnect() {
-        session?.disconnect()
-    }
+//    fun disconnect() {
+//        session?.disconnect()
+//    }
 }

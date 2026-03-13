@@ -1,3 +1,5 @@
+//import org.gradle.accessors.dm.LibrariesForLibs
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -53,5 +55,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // bibliothèque SSH
     implementation(libs.jsch.mwiede)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation(libs.androidx.lifecycle.runtime)
 }
