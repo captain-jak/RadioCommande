@@ -52,7 +52,8 @@ private val dictionnaireCommandes = mapOf(
     "GrazieInspection", "GrazieInspection", "GrazieInspection", "GrazieInspection",
     "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
     "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
-    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression"
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
+    "SpellCheckingInspection", "SpellCheckingInspection"
 )
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -151,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             android.util.Log.d("SSH_COMMAND", "MainActivity-154 : $commandeAExecuter")
             Thread {SSHManager.executerCommandeSSH(this, commandeAExecuter)}.start()
             val console = findViewById<TextView>(R.id.textConsole)
-            console.text = "Vous écoutez $texte"
+            console.text = getString(R.string.console_listening, texte)
         } else {
             parler("OK, je cherche.")
             // Cas spécial pour la recherche dynamique (ex:"cherche erreur")
@@ -194,13 +195,13 @@ class MainActivity : AppCompatActivity() {
             // Vérifier que l’index est valide
             if (indexCible in listeFichiers.indices) {
                 val cheminAudio = listeFichiers[indexCible]
-                val nom = cheminAudio.substringAfterLast("/")
+                //val nom = cheminAudio.substringAfterLast("/")
                 android.util.Log.d("SSH_COMMAND", "MainActivity-199 : $cheminAudio")
         // 2- Execution mpv
                 val cmdLire = """pkill mpv; mpv --no-video --input-ipc-server=/tmp/mpv-socket "$cheminAudio" > /dev/null 2>&1 &"""
                 SSHManager.executerCommandeSSH(this, cmdLire)
                 //updateConsole("Vous écoutez : $nom")
-                val console = findViewById<TextView>(R.id.textConsole)
+                //val console = findViewById<TextView>(R.id.textConsole)
             } else {
                 println("Index invalide")
             }
@@ -230,16 +231,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun clearConsole() {
-        runOnUiThread {
-            tvConsole.text = "" // On vide le texte
-            // Optionnel : On remet le scroll en haut
-            val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
-            scroll?.post { 
-                scroll.fullScroll(View.FOCUS_UP) 
-            }
-        }
-    }
+//    private fun clearConsole() {
+//        runOnUiThread {
+//            tvConsole.text = "" // On vide le texte
+//            // Optionnel : On remet le scroll en haut
+//            val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
+//            scroll?.post {
+//                scroll.fullScroll(View.FOCUS_UP)
+//            }
+//        }
+//    }
 
 //-------------------------------      Lecture audio de texte      ---------------------------------------
     private fun parler(message: String) {
@@ -253,7 +254,9 @@ class MainActivity : AppCompatActivity() {
         val tvStatus = findViewById<TextView>(R.id.tvStatusConnexion)
         val dot = findViewById<View>(R.id.viewStatusDot)
         tvStatus.text = getString(R.string.verification)
-        SSHManager.testerConnexion(this) { success ->
+        //SSHManager.testerConnexion(this) { success ->
+    SSHManager.testerConnexion(this) { success, message ->
+            tvStatus.text = message ?: "Résultat inconnu"
             if (success) {
                 tvStatus.text = getString(R.string.serveur_connecte)
                 //tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Vert
@@ -261,7 +264,8 @@ class MainActivity : AppCompatActivity() {
                 dot.setBackgroundResource(android.R.drawable.presence_online)
             } else {
                 tvStatus.text = getString(R.string.serveur_hors_ligne)
-                tvStatus.setTextColor(android.graphics.Color.RED)
+                //tvStatus.setTextColor(android.graphics.Color.RED)
+                tvStatus.setTextColor(Color.RED)
                 dot.setBackgroundResource(android.R.drawable.presence_offline)
             }
         }

@@ -22,4 +22,10 @@
     <string name="volume_muet">Volume: none</string>
     <string name="volume_du_serveur">Server volume: %1$d%%</string>
     <string name="volume_format">Volume: %1$d%%</string>
+    <string name="console_listening">You are listening to %s</string>
+    <string name="statut_attente">Waiting…</string>
+    <string name="response_empty">Command executed</string>
+    <string name="error_execution">Error : %s</string>
+    <string name="success_execution">command executed</string>
+
 </resources>

@@ -4,10 +4,10 @@ import android.content.Context
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import com.jcraft.jsch.ChannelExec
-import java.io.InputStream
+//import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.runBlocking // Optionnel, selon l'usage
+//import kotlinx.coroutines.runBlocking // Optionnel, selon l'usage
 
 object SSHManager {
     //  Test de connexion SSH
@@ -41,7 +41,8 @@ object SSHManager {
         }
     }
  
-    fun testerConnexion(context: Context, callback: (Boolean) -> Unit) {
+    //fun testerConnexion(context: Context, callback: (Boolean) -> Unit) {
+    fun testerConnexion(context: Context, callback: (Boolean, String?) -> Unit) {
         // Récupération sécurisée des données
         val prefs = context.getSharedPreferences("SSH_REGLAGES", Context.MODE_PRIVATE)
         val ip = prefs.getString("ip", "") ?: ""
@@ -53,7 +54,8 @@ object SSHManager {
         // On lance le test dans un Thread pour ne pas bloquer l'écran
         Thread {
             try {
-                val jsch = com.jcraft.jsch.JSch()
+                val jsch = JSch()
+                //val jsch = com.jcraft.jsch.JSch()
                 val session = jsch.getSession(user, lip, port)
                 // On définit le mot de passe pour la session
                 session.setPassword(pass)
@@ -66,12 +68,15 @@ object SSHManager {
                 session.disconnect()
                 // Retour à l'interface graphique pour mettre à jour le texte
                 (context as? android.app.Activity)?.runOnUiThread {
-                     callback(isConnected)
+                    val successMessage = context.getString(R.string.success_execution)
+                     callback(isConnected,successMessage)
                 }
             } catch (e: Exception) {
-                //(context as? android.app.Activity)?.runOnUiThread {
-                 //    callback(false)
-                //}
+                (context as? android.app.Activity)?.runOnUiThread {
+                    val errorMessage = context.getString(R.string.error_execution, e.message ?: "Unknown error")
+                        // Assuming your callback can take the error message
+                     callback(false, errorMessage)
+                }
             }
         }.start()
     }
@@ -86,7 +91,8 @@ object SSHManager {
         val lip = ip.substringBefore(":", ip) // Prend tout si pas de ":"
         val portString = ip.substringAfter(":", "22") // 22 par défaut si pas de ":"
         val port = portString.toIntOrNull() ?: 22
-        val jsch = com.jcraft.jsch.JSch()
+        val jsch = JSch()
+        //val jsch = com.jcraft.jsch.JSch()
         val session = jsch.getSession(user, lip, port)
         // On définit le mot de passe pour la session
         session.setPassword(pass)
@@ -126,14 +132,17 @@ object SSHManager {
             // Lire la réponse du serveur
             val response = inputStream.bufferedReader().use { it.readText() }
             channel.disconnect()
-            if (response.isEmpty()) "Commande exécutée (pas de retour)" else response
+            //if (response.isEmpty()) "Commande exécutée (pas de retour)" else response
+            response.ifEmpty { context.getString(R.string.response_empty) }
+            //val displayResponse = response.ifEmpty { "Commande exécutée (pas de retour)" }
+            //val result: String = response.ifEmpty { getString(R.string.response_empty) }
         } catch (e: Exception) {
             "Erreur d'exécution : ${e.message}"
         }
     }
 
-    fun disconnect() {
-        session?.disconnect()
-        session = null
-    }
+//    fun disconnect() {
+//        session?.disconnect()
+//        session = null
+//    }
 }
