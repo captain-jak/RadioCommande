@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 import androidx.core.graphics.toColorInt
+import androidx.annotation.StringRes
 
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
@@ -138,23 +139,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun interpreterEtEnvoyer(texte: String) {
         var commandeAExecuter: String? = null
+        var cleTrouvee: String? = null
         // arrête le processus de lecture ds titres ...
         arreterSurveillance()
         // On parcourt le dictionnaire pour voir si un mot-clé est dans le texte entendu
         for ((cle, commande) in dictionnaireCommandes) {
             if (texte.contains(cle)) {
                 commandeAExecuter = commande
+                cleTrouvee = cle
                 break // On s'arrête au premier mot trouvé
             }
         }
         if (commandeAExecuter != null) {
+            val finalKey = cleTrouvee
+            // Utilisation des valeurs du dictionnaire
             //updateConsole("Action : Recherche de '$commandeAExecuter'...")
             android.util.Log.d("SSH_COMMAND", "MainActivity-154 : $commandeAExecuter")
             Thread {SSHManager.executerCommandeSSH(this, commandeAExecuter)}.start()
-            val console = findViewById<TextView>(R.id.textConsole)
-            console.text = getString(R.string.console_listening, texte)
+            if (finalKey == "tous") {
+                arreterSurveillance()
+                surveillerMusique()
+             } else {
+                val console = findViewById<TextView>(R.id.textConsole)
+                console.text = getString(R.string.console_listening, texte)
+             }
         } else {
-            parler("OK, je cherche.")
+            // parler("OK, je cherche.")
             // Cas spécial pour la recherche dynamique (ex:"cherche erreur")
             if (texte.contains("cherche")) {
                 //updateConsole("Je cherche '$texte'")
@@ -173,7 +183,8 @@ class MainActivity : AppCompatActivity() {
                 }
             //------------------------------------------------------------------------------------------------------------------------------
             } else {
-               parler("commande inexistante")
+               //parler("commande inexistante")
+               parler(R.string.command_unknown)
                updateConsole("Système : Commande '$texte' inconnue.")
             }
         }
@@ -214,7 +225,7 @@ class MainActivity : AppCompatActivity() {
          // Construction de la commande find
         val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
         //updateConsole("la commande:  '$commande'")
-        // Utilisation de votre SSHManager
+        // Utilisation de votre SSHManager avec un trhread
         Thread {SSHManager.executerCommandeSSH(this, commande)}.start()
         surveillerMusique()
     }
@@ -223,7 +234,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateConsole(msg: String) {
         runOnUiThread {
             tvConsole.append("\n$msg")
-        
             // On utilise android.widget.ScrollView ici pour correspondre au XML
             val scroll = findViewById<androidx.core.widget.NestedScrollView>(R.id.consoleScroll)
             scroll?.post { 
@@ -243,9 +253,10 @@ class MainActivity : AppCompatActivity() {
 //    }
 
 //-------------------------------      Lecture audio de texte      ---------------------------------------
-    private fun parler(message: String) {
+    private fun parler(@StringRes messageRes: Int) {
+        val textToSpeak = getString(messageRes)
         if (::tts.isInitialized) { // Vérifie si tts a été bien créé
-            tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+            tts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, null)
         }
     }
 
@@ -254,18 +265,15 @@ class MainActivity : AppCompatActivity() {
         val tvStatus = findViewById<TextView>(R.id.tvStatusConnexion)
         val dot = findViewById<View>(R.id.viewStatusDot)
         tvStatus.text = getString(R.string.verification)
-        //SSHManager.testerConnexion(this) { success ->
-    SSHManager.testerConnexion(this) { success, message ->
+        SSHManager.testerConnexion(this) { success, message ->
             tvStatus.text = message ?: "Résultat inconnu"
             if (success) {
                 tvStatus.text = getString(R.string.serveur_connecte)
-                //tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Vert
-                tvStatus.setTextColor("#4CAF50".toColorInt())
+                tvStatus.setTextColor("#4CAF50".toColorInt()) // Vert
                 dot.setBackgroundResource(android.R.drawable.presence_online)
             } else {
                 tvStatus.text = getString(R.string.serveur_hors_ligne)
-                //tvStatus.setTextColor(android.graphics.Color.RED)
-                tvStatus.setTextColor(Color.RED)
+                tvStatus.setTextColor(Color.RED) // Rouge
                 dot.setBackgroundResource(android.R.drawable.presence_offline)
             }
         }
@@ -294,18 +302,17 @@ class MainActivity : AppCompatActivity() {
                 val letitre: String = if (response.contains("\"data\":\"")) {
                     response.substringAfter("\"data\":\"").substringBefore("\"")
                 } else {
-                   "Aucune musique" // Cette ligne est bien une String
+                   "Aucune musique" // Cette ligne est bien un String
                 }
                 if (response.startsWith("Erreur")) {
                     console.setTextColor(Color.RED)
                 } else {
                     console.setTextColor(Color.GREEN)
                }
+               val resultat = letitre.substringBeforeLast(".") // suppression extension des fichiers
                //***********************   A FAIRE    ***************
-               // => suppression extension mp3
-               //val resultat = letitre.removeSuffix(".mp3")
-               // Supprime n'impotre quelle extension
-               val resultat = letitre.substringBeforeLast(".")
+               // => 
+
                //********************************************************
                console.text = resultat
             }

@@ -28,4 +28,5 @@
 	<string name="response_empty">Commande exécutée (pas de retour)</string>
 	<string name="error_execution">Erreur : %s</string>
 	<string name="success_execution">commande éxécutée</string>
+	<string name="command_unknown">Commande inexistante</string>
 </resources>

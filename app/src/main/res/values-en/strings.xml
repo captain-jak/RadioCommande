@@ -27,5 +27,6 @@
     <string name="response_empty">Command executed</string>
     <string name="error_execution">Error : %s</string>
     <string name="success_execution">command executed</string>
+    <string name="command_unknown">Unknown command</string>
 
 </resources>
