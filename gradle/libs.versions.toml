@@ -8,7 +8,7 @@ appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.13.0"
 constraintlayout = "2.2.1"
-jsch = "2.27.8"
+jsch = "2.27.9"
 lifecycle="2.10.0"
 
 [libraries]

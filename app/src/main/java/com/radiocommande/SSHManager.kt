@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 //import kotlinx.coroutines.runBlocking // Optionnel, selon l'usage
 
 object SSHManager {
-    private val DEBUG=false
+    private const val DEBUG=false
     //  Test de connexion SSH
     // 1. Déclarer la session au niveau de la classe pour qu'elle soit accessible partout
     var session: Session? = null

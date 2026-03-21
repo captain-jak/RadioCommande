@@ -28,5 +28,5 @@
     <string name="error_execution">Error : %s</string>
     <string name="success_execution">command executed</string>
     <string name="command_unknown">Unknown command</string>
-
+    <string name="surveillance_stop">Monitoring stopped</string>
 </resources>

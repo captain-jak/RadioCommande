@@ -21,6 +21,7 @@
     <string name="statut_cle">Statut : Aucune clé importée</string>
     <string name="statut_cle_import_succes">Statut : Clé importée avec succès</string>
     <string name="success_execution">commande éxécutée</string>
+    <string name="surveillance_stop">Surveillance arrêtée</string>
     <string name="telecharger_cle">Télécharger la clé SSH</string>
     <string name="utilisateur">Utilisateur (ex: pi)</string>
     <string name="verification">Vérification…</string>

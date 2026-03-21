@@ -24,8 +24,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import android.graphics.Color
 
-import org.json.JSONObject
-
 
 // mot cles reserves (a ne pas utiliser dans le dictionnaire
 // CHERCHE -- SUIVANT -- PRECEDENT - QUITTER -- PLAYLIST
@@ -63,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         //Initialisation des valeurs globales
         private const val REPERTOIRE_MUSIQUE = "/srv/Musique/"
-        private val DEBUG=false
+        private const val DEBUG=false
     }
     private lateinit var tvConsole: TextView
     private lateinit var pulseView: View
@@ -204,13 +202,23 @@ class MainActivity : AppCompatActivity() {
             //updateConsole("Action : Recherche de '$commandeAExecuter'...")
             if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : $commandeAExecuter")
             Thread {SSHManager.executerCommandeSSH(this, commandeAExecuter)}.start()
-            if (finalKey == "tous" || finalKey == "précédent" || finalKey == "suivant") {
-                if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : Tout écouter")
-                surveillerMusique()
-             } else {
-                val console = findViewById<TextView>(R.id.textConsole)
-                console.text = getString(R.string.console_listening, texte)
-             }
+            //if (finalKey == "tous" || finalKey == "précédent" || finalKey == "suivant") {
+            when (finalKey) {
+                // Cas 1 : Lancer la surveillance pour ces touches
+                "tous", "précédent", "suivant" -> {
+                    if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : Tout écouter")
+                    surveillerMusique()
+                }
+                // Cas 2 : Arrêter la surveillance
+                "stop", "quitter" -> {
+                    arreterSurveillance()
+                }
+                // Cas par défaut
+                else -> {
+                    val console = findViewById<TextView>(R.id.textConsole)
+                    console.text = getString(R.string.console_listening, texte)
+                }
+            }
         } else {
             // parler("OK, je cherche.")
             // Cas spécial pour la recherche dynamique (ex:"cherche erreur")
@@ -353,7 +361,7 @@ class MainActivity : AppCompatActivity() {
         jobSurveillance = null
         SSHManager.disconnect()
         if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : SurveillanceMusique arrêter")
-        findViewById<TextView>(R.id.textConsole).text = "Surveillance arrêtée"
+        findViewById<TextView>(R.id.textConsole).text = getString(R.string.surveillance_stop)
     }
     
     //---------------------------------------------------------------------------------------------------------------
@@ -362,6 +370,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         verifierStatutServeur()
+        surveillerMusique()
     }
     
     override fun onDestroy() {
@@ -369,6 +378,7 @@ class MainActivity : AppCompatActivity() {
             tts.stop()
             tts.shutdown()
         }
+        arreterSurveillance()
         super.onDestroy()
     }
 }
