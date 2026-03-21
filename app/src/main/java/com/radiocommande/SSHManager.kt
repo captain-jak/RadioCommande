@@ -10,10 +10,12 @@ import kotlinx.coroutines.withContext
 //import kotlinx.coroutines.runBlocking // Optionnel, selon l'usage
 
 object SSHManager {
+    private val DEBUG=false
     //  Test de connexion SSH
     // 1. Déclarer la session au niveau de la classe pour qu'elle soit accessible partout
     var session: Session? = null
     private var sessionMain: Session? = null
+    val line2 = Throwable().stackTrace[0].lineNumber
     //-------------------------------      Création d'une connexion ssh permanente      ---------------------------------------
     suspend fun connect(context: Context): Boolean = withContext(Dispatchers.IO) {
         // Si déjà connecté, on ne fait rien
@@ -125,7 +127,7 @@ object SSHManager {
             //val channel = sessionMain?.openChannel("exec") as com.jcraft.jsch.ChannelExec
             val channelMain = sessionMain?.openChannel("exec") as ChannelExec
             channelMain.setCommand(command)
-            android.util.Log.d("SSH_COMMAND", "SSHManager-122 : $command")
+            if (DEBUG) android.util.Log.d("ISDEBUG", "SSHManager-$line2 : $command")
             // Il est important de récupérer le flux de sortie AVANT le connect() du channel
             val inputStream = channelMain.inputStream
             channelMain.connect()
@@ -143,11 +145,11 @@ object SSHManager {
         try {
             if (sessionMain != null && sessionMain!!.isConnected) {
                 sessionMain!!.disconnect()
-                android.util.Log.d("SSH_DEBUG", "Session déconnectée avec succès")
+                if (DEBUG) android.util.Log.d("ISDEBUG", "SSHManager-$line2: Session déconnectée avec succès")
             }
             session = null
         } catch (e: Exception) {
-            android.util.Log.e("SSH_DEBUG", "Erreur lors de la déconnexion : ${e.message}")
+            if (DEBUG) android.util.Log.e("ISDEBUG", "SSHManager-$line2: Erreur lors de la déconnexion : ${e.message}")
         }
     }
 }

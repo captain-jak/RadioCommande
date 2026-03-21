@@ -42,14 +42,10 @@ private val dictionnaireCommandes = mapOf(
     "radio 50" to "pkill mpv ; nohup mpv https://stream.radio5050.com/hls/live.m3u8 > /dev/null 2>&1 &",
     "radio fip" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fip/fip_hifi.m3u8 > /dev/null 2>&1 &",
     "radio catho" to "pkill mpv ; nohup mpv https://liveradiokto.akamaized.net/hls/live/20000054/ktoradio/02.m3u8 > /dev/null 2>&1 &",
-
-    //"dylan" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
-    //"douce" to "nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
-    //"tahiti" to "pkill mpv ; nohup mpv --shuffle  --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Chants tahitiens traditionnels/' > /dev/null 2>&1 &",
-    //"stevens" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Cat Stevens/' > /dev/null 2>&1 &",
     "tous" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /srv/Musique/ > /dev/null 2>&1 &"
 )
 
+// Pour supprimer warnings à la compilation
 @Suppress("GrazieInspection", "GrazieInspection", "GrazieInspection", "GrazieInspection",
     "GrazieInspection", "GrazieInspection", "GrazieInspection", "GrazieInspection",
     "GrazieInspection", "GrazieInspection", "GrazieInspection", "GrazieInspection",
@@ -58,9 +54,14 @@ private val dictionnaireCommandes = mapOf(
     "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
     "SpellCheckingInspection", "SpellCheckingInspection"
 )
+
+//---------------------------------------------------------------------------------------------------------------------
+//                                               Début de la classe MainActivity
+//---------------------------------------------------------------------------------------------------------------------
+        
 class MainActivity : AppCompatActivity() {
     companion object {
-        //private const val REPERTOIRE_MUSIQUE = "/home/enjoy/Musique/"
+        //Initialisation des valeurs globales
         private const val REPERTOIRE_MUSIQUE = "/srv/Musique/"
         private val DEBUG=false
     }
@@ -70,23 +71,12 @@ class MainActivity : AppCompatActivity() {
     private var isListening = false
     //------ 12-03-2026 --------------------
     private var jobSurveillance: Job? = null
-    //------------------------------------------
-
-    // Gestion du retour de la reconnaissance vocale
-    private val getSpeechInput = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        isListening = false
-        pulseView.visibility = View.GONE // Arrête l'animation visuelle
-        
-        if (result.resultCode == RESULT_OK) {
-            val data = result.data
-            val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            val texteEntendu = results?.get(0)?.lowercase() ?: ""
-            
-            updateConsole("Micro : \"$texteEntendu\"")
-            interpreterEtEnvoyer(texteEntendu)
-        }
-    }
-//---------------------------------------------------------------------------------------------------------------------------------
+    // Numérotation des lignes de l'application
+   val line = Throwable().stackTrace[0].lineNumber
+    
+        //------------------------------------------------------------------------------------------------------------
+    // --------         Fonction  initialisation RadioCommande (vue - permissions              -----
+    //---------------------------------------------------------------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -120,9 +110,47 @@ class MainActivity : AppCompatActivity() {
             lancerEcouteVocale()
         }
     }
+       //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction de Vérification du statut du serveur                              -----
+    //---------------------------------------------------------------------------------------------------------------
+    private fun verifierStatutServeur() {
+        val tvStatus = findViewById<TextView>(R.id.tvStatusConnexion)
+        val dot = findViewById<View>(R.id.viewStatusDot)
+        tvStatus.text = getString(R.string.verification)
+        SSHManager.testerConnexion(this) { success, message ->
+            tvStatus.text = message ?: "Résultat inconnu"
+            if (success) {
+                tvStatus.text = getString(R.string.serveur_connecte)
+                tvStatus.setTextColor("#4CAF50".toColorInt()) // Vert
+                dot.setBackgroundResource(android.R.drawable.presence_online)
+            } else {
+                tvStatus.text = getString(R.string.serveur_hors_ligne)
+                tvStatus.setTextColor(Color.RED) // Rouge
+                dot.setBackgroundResource(android.R.drawable.presence_offline)
+            }
+        }
+    }
+    
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction Anilmation d'un bouton                                                 -----
+    //---------------------------------------------------------------------------------------------------------------
+    private fun startPulseAnimation() {
+        pulseView.visibility = View.VISIBLE
+        val scaleX = ObjectAnimator.ofFloat(pulseView, "scaleX", 1f, 2f)
+        val scaleY = ObjectAnimator.ofFloat(pulseView, "scaleY", 1f, 2f)
+        val alpha = ObjectAnimator.ofFloat(pulseView, "alpha", 1f, 0f)
 
-//-------------------------------      Lancer l'ecoute vocale      ---------------------------------------
-    private fun lancerEcouteVocale() {
+        AnimatorSet().apply {
+            duration = 1000
+            playTogether(scaleX, scaleY, alpha)
+            start()
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------------          Fonction Lancement écoute vocale                                   -----
+    //---------------------------------------------------------------------------------------------------------------
+        private fun lancerEcouteVocale() {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR")
@@ -137,10 +165,27 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Erreur micro : ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
-   
-//-------------------------------      Commande a envoyer au serveur      ---------------------------------------
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------------          Fonction du retour de la reconnaissance vocale               -----
+    //---------------------------------------------------------------------------------------------------------------
+    private val getSpeechInput = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        isListening = false
+        pulseView.visibility = View.GONE // Arrête l'animation visuelle
+        
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val texteEntendu = results?.get(0)?.lowercase() ?: ""
+            
+            updateConsole("Micro : \"$texteEntendu\"")
+            interpreterEtEnvoyer(texteEntendu)
+        }
+    }
 
-    private fun interpreterEtEnvoyer(texte: String) {
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------------          Fonction commande à envoyer au serveur                       -----
+    //---------------------------------------------------------------------------------------------------------------
+   private fun interpreterEtEnvoyer(texte: String) {
         var commandeAExecuter: String? = null
         var cleTrouvee: String? = null
         // arrête le processus de lecture ds titres ...
@@ -157,10 +202,10 @@ class MainActivity : AppCompatActivity() {
             val finalKey = cleTrouvee
             // Utilisation des valeurs du dictionnaire
             //updateConsole("Action : Recherche de '$commandeAExecuter'...")
-            android.util.Log.d("SSH_COMMAND", "MainActivity-154 : $commandeAExecuter")
+            if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : $commandeAExecuter")
             Thread {SSHManager.executerCommandeSSH(this, commandeAExecuter)}.start()
-            if (finalKey == "tous") {
-                arreterSurveillance()
+            if (finalKey == "tous" || finalKey == "précédent" || finalKey == "suivant") {
+                if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : Tout écouter")
                 surveillerMusique()
              } else {
                 val console = findViewById<TextView>(R.id.textConsole)
@@ -193,7 +238,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//-------------------------------      Recherche d'un morceau sur le serveur      ---------------------------------------
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction Recherche d'un morceau sur le serveur                      -----
+    //---------------------------------------------------------------------------------------------------------------
     private fun chercherFichierSurServeur(motCle: String) {
          // 1- Recherche le fichier dans la base de données musicale 
         val cmdRecherche = """locate -i -d /home/enjoy/musique.db "*$motCle*""""
@@ -210,7 +257,7 @@ class MainActivity : AppCompatActivity() {
             if (indexCible in listeFichiers.indices) {
                 val cheminAudio = listeFichiers[indexCible]
                 //val nom = cheminAudio.substringAfterLast("/")
-                android.util.Log.d("SSH_COMMAND", "MainActivity-199 : $cheminAudio")
+                if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : $cheminAudio")
         // 2- Execution mpv
                 val cmdLire = """pkill mpv; mpv --no-video --input-ipc-server=/tmp/mpv-socket "$cheminAudio" > /dev/null 2>&1 &"""
                 SSHManager.executerCommandeSSH(this, cmdLire)
@@ -223,7 +270,9 @@ class MainActivity : AppCompatActivity() {
         surveillerMusique()
     }
 
-    //----------------------------      Recherche d'un Répertoire sur le serveur      ---------------------------------------
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction Recherche d'un Répertoire sur le serveur                   -----
+    //---------------------------------------------------------------------------------------------------------------
     private fun chercherRepertoireSurServeur(motCle: String) {
          // Construction de la commande find
         val commande = "pkill mpv; find '$REPERTOIRE_MUSIQUE' -type d -iname *'$motCle'* -print -quit | xargs -d '\n' mpv --shuffle --input-ipc-server=/tmp/mpv-socket  > /dev/null 2>&1 &"
@@ -233,7 +282,9 @@ class MainActivity : AppCompatActivity() {
         surveillerMusique()
     }
 
-//-------------------------------      Lecture audio de texte      ---------------------------------------
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction de Rafraichissement de la console                              -----
+    //---------------------------------------------------------------------------------------------------------------
     private fun updateConsole(msg: String) {
         runOnUiThread {
             tvConsole.append("\n$msg")
@@ -244,6 +295,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction de Nettoyage de la console                                         -----
+    //---------------------------------------------------------------------------------------------------------------
 //    private fun clearConsole() {
 //        runOnUiThread {
 //            tvConsole.text = "" // On vide le texte
@@ -255,7 +310,9 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
-//-------------------------------      Lecture audio de texte      ---------------------------------------
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction de Lecture audio de texte                                            -----
+    //---------------------------------------------------------------------------------------------------------------
     private fun parler(@StringRes messageRes: Int) {
         val textToSpeak = getString(messageRes)
         if (::tts.isInitialized) { // Vérifie si tts a été bien créé
@@ -263,38 +320,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//-------------------------------      Verifier le statut du serveur     ---------------------------------------
-    private fun verifierStatutServeur() {
-        val tvStatus = findViewById<TextView>(R.id.tvStatusConnexion)
-        val dot = findViewById<View>(R.id.viewStatusDot)
-        tvStatus.text = getString(R.string.verification)
-        SSHManager.testerConnexion(this) { success, message ->
-            tvStatus.text = message ?: "Résultat inconnu"
-            if (success) {
-                tvStatus.text = getString(R.string.serveur_connecte)
-                tvStatus.setTextColor("#4CAF50".toColorInt()) // Vert
-                dot.setBackgroundResource(android.R.drawable.presence_online)
-            } else {
-                tvStatus.text = getString(R.string.serveur_hors_ligne)
-                tvStatus.setTextColor(Color.RED) // Rouge
-                dot.setBackgroundResource(android.R.drawable.presence_offline)
-            }
-        }
-    }
-//-------------------------------      Anilmation d'un bouton     ---------------------------------------
-    private fun startPulseAnimation() {
-        pulseView.visibility = View.VISIBLE
-        val scaleX = ObjectAnimator.ofFloat(pulseView, "scaleX", 1f, 2f)
-        val scaleY = ObjectAnimator.ofFloat(pulseView, "scaleY", 1f, 2f)
-        val alpha = ObjectAnimator.ofFloat(pulseView, "alpha", 1f, 0f)
-
-        AnimatorSet().apply {
-            duration = 1000
-            playTogether(scaleX, scaleY, alpha)
-            start()
-        }
-    }
-    
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction Affichage des infos du titre joué                                   -----
+    //---------------------------------------------------------------------------------------------------------------
     fun surveillerMusique() {
         // On annule l'ancienne surveillance si elle tournait déjà
         jobSurveillance?.cancel()
@@ -317,13 +345,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------------        Fonction Arrêt affichage  des infos du titre joué                          -----
+    //---------------------------------------------------------------------------------------------------------------
     fun arreterSurveillance() {
         jobSurveillance?.cancel()
         jobSurveillance = null
         SSHManager.disconnect()
+        if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : SurveillanceMusique arrêter")
         findViewById<TextView>(R.id.textConsole).text = "Surveillance arrêtée"
     }
     
+    //---------------------------------------------------------------------------------------------------------------
+    // ---------     Fonction de reprise de l'application (onResume et onDestroy)             -----
+    //---------------------------------------------------------------------------------------------------------------
     override fun onResume() {
         super.onResume()
         verifierStatutServeur()
