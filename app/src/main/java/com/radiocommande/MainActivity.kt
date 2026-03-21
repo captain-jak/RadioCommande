@@ -24,6 +24,8 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import android.graphics.Color
 
+import org.json.JSONObject
+
 
 // mot cles reserves (a ne pas utiliser dans le dictionnaire
 // CHERCHE -- SUIVANT -- PRECEDENT - QUITTER -- PLAYLIST
@@ -41,10 +43,10 @@ private val dictionnaireCommandes = mapOf(
     "radio fip" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fip/fip_hifi.m3u8 > /dev/null 2>&1 &",
     "radio catho" to "pkill mpv ; nohup mpv https://liveradiokto.akamaized.net/hls/live/20000054/ktoradio/02.m3u8 > /dev/null 2>&1 &",
 
-    "dylan" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
-    "douce" to "nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
-    "tahiti" to "pkill mpv ; nohup mpv --shuffle  --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Chants tahitiens traditionnels/' > /dev/null 2>&1 &",
-    "stevens" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Cat Stevens/' > /dev/null 2>&1 &",
+    //"dylan" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique//Bob Dylan/' > /dev/null 2>&1 &",
+    //"douce" to "nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /home/enjoy/Musique/sweet/ > /dev/null 2>&1 &",
+    //"tahiti" to "pkill mpv ; nohup mpv --shuffle  --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Chants tahitiens traditionnels/' > /dev/null 2>&1 &",
+    //"stevens" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket '/home/enjoy/Musique/Cat Stevens/' > /dev/null 2>&1 &",
     "tous" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /srv/Musique/ > /dev/null 2>&1 &"
 )
 
@@ -60,13 +62,14 @@ class MainActivity : AppCompatActivity() {
     companion object {
         //private const val REPERTOIRE_MUSIQUE = "/home/enjoy/Musique/"
         private const val REPERTOIRE_MUSIQUE = "/srv/Musique/"
+        private val DEBUG=false
     }
     private lateinit var tvConsole: TextView
     private lateinit var pulseView: View
     private lateinit var tts: TextToSpeech
     private var isListening = false
     //------ 12-03-2026 --------------------
-    private var musiqueJob: Job? = null
+    private var jobSurveillance: Job? = null
     //------------------------------------------
 
     // Gestion du retour de la reconnaissance vocale
@@ -293,36 +296,32 @@ class MainActivity : AppCompatActivity() {
     }
     
     fun surveillerMusique() {
-        lifecycleScope.launch {
+        // On annule l'ancienne surveillance si elle tournait déjà
+        jobSurveillance?.cancel()
+        jobSurveillance = lifecycleScope.launch {
             while (isActive) {
-                val cmd = "echo '{ \"command\": [\"get_property\", \"media-title\"] }' | socat - /tmp/mpv-socket"
+                // script mpv-info.sh sur le serveur - le script retourne les infos du fichier en cours de lecture
+                //imite de temps (ex: 30 secondes). S'il boucle à l'infini, il s'arrêtera tout seul
+                val cmd = "timeout 10s  ~/admin/mpv-info.sh"
+                val line = Throwable().stackTrace[0].lineNumber
+                if (DEBUG) android.util.Log.d("ISDEBUG", "MainActivity-$line : $cmd")
                 val console = findViewById<TextView>(R.id.textConsole)
                 val response = SSHManager.execute(this@MainActivity, cmd)
-                // Extraction du titre
-                val letitre: String = if (response.contains("\"data\":\"")) {
-                    response.substringAfter("\"data\":\"").substringBefore("\"")
-                } else {
-                   "Aucune musique" // Cette ligne est bien un String
-                }
-                if (response.startsWith("Erreur")) {
+                if (response.startsWith("Artiste inconnu")) {
                     console.setTextColor(Color.RED)
                 } else {
                     console.setTextColor(Color.GREEN)
                }
-               val resultat = letitre.substringBeforeLast(".") // suppression extension des fichiers
-               //***********************   A FAIRE    ***************
-               // => 
-
-               //********************************************************
-               console.text = resultat
+                console.text = response
             }
         }
     }
     
-    private fun arreterSurveillance() {
-        musiqueJob?.cancel() // Arrête net la boucle while(isActive)
-        musiqueJob = null
-       // updateConsole("Pas de titre lu.")
+    fun arreterSurveillance() {
+        jobSurveillance?.cancel()
+        jobSurveillance = null
+        SSHManager.disconnect()
+        findViewById<TextView>(R.id.textConsole).text = "Surveillance arrêtée"
     }
     
     override fun onResume() {

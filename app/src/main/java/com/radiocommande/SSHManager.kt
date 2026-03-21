@@ -123,26 +123,31 @@ object SSHManager {
         // 2. Utiliser sessionMain qui est maintenant garanti comme connecté
         try {
             //val channel = sessionMain?.openChannel("exec") as com.jcraft.jsch.ChannelExec
-            val channel = sessionMain?.openChannel("exec") as ChannelExec
-            channel.setCommand(command)
+            val channelMain = sessionMain?.openChannel("exec") as ChannelExec
+            channelMain.setCommand(command)
             android.util.Log.d("SSH_COMMAND", "SSHManager-122 : $command")
             // Il est important de récupérer le flux de sortie AVANT le connect() du channel
-            val inputStream = channel.inputStream
-            channel.connect()
+            val inputStream = channelMain.inputStream
+            channelMain.connect()
             // Lire la réponse du serveur
             val response = inputStream.bufferedReader().use { it.readText() }
-            channel.disconnect()
+            channelMain.disconnect()
             //if (response.isEmpty()) "Commande exécutée (pas de retour)" else response
             response.ifEmpty { context.getString(R.string.response_empty) }
-            //val displayResponse = response.ifEmpty { "Commande exécutée (pas de retour)" }
-            //val result: String = response.ifEmpty { getString(R.string.response_empty) }
         } catch (e: Exception) {
             "Erreur d'exécution : ${e.message}"
         }
     }
-
-//    fun disconnect() {
-//        session?.disconnect()
-//        session = null
-//    }
+    
+    fun disconnect() {
+        try {
+            if (sessionMain != null && sessionMain!!.isConnected) {
+                sessionMain!!.disconnect()
+                android.util.Log.d("SSH_DEBUG", "Session déconnectée avec succès")
+            }
+            session = null
+        } catch (e: Exception) {
+            android.util.Log.e("SSH_DEBUG", "Erreur lors de la déconnexion : ${e.message}")
+        }
+    }
 }

@@ -34,4 +34,4 @@ git add . && git commit -m "update" && git push -u origin master
 ## 🛠️ Prerequis
 
 Sur le serveur:
-sudo apt install sshfs mpv socat
+sudo apt install sshfs mpv socat id3v2 ffmpeg
