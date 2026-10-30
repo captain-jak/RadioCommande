@@ -8,8 +8,8 @@ android {
     //namespace = "com.example.radiocommande"
     namespace = "com.radiocommande"
     compileSdk {
-           version = release(36) {
-            //version = release(34) {
+           version = release(37) {
+            //version = release(37) {
             minorApiLevel = 1
         }
     }
