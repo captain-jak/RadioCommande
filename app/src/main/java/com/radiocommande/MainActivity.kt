@@ -41,7 +41,7 @@ private val dictionnaireCommandes = mapOf(
     "radio fip" to "pkill mpv ; nohup mpv https://stream.radiofrance.fr/fip/fip_hifi.m3u8 > /dev/null 2>&1 &",
     "radio oiseau" to "pkill mpv ; nohup mpv  http://chantoiseau.selfmicro.com:8000/zozio-48k.opus > /dev/null 2>&1 &",
     "oiseau classique" to "pkill mpv ; nohup mpv  http://chantoiseau.selfmicro.com:8000/zozio_classic-48k.opus > /dev/null 2>&1 &",
-    "radio catho" to "pkill mpv ; nohup mpv https://liveradiokto.akamaized.net/hls/live/20000054/ktoradio/02.m3u8 > /dev/null 2>&1 &",
+    //"radio catho" to "pkill mpv ; nohup mpv https://liveradiokto.akamaized.net/hls/live/20000054/ktoradio/02.m3u8 > /dev/null 2>&1 &",
     "tous" to "pkill mpv ; nohup mpv --shuffle --input-ipc-server=/tmp/mpv-socket /srv/Musique/ > /dev/null 2>&1 &"
 )
 
